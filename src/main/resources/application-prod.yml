@@ -1,0 +1,21 @@
+server:
+  port: 9921
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://smallsmart.top/forum?useUnicode=true&characterEncoding=UTF8&useSSL=false
+    username: root
+    password: password
+  redis:
+    host: smallsmart.top
+    port: 6379
+    password: lc200009
+
+JWTParam:
+  cookieDomain: admin.smallsmart.top
+  cookieSecure: false
+
+# 静态资源存储地址
+web:
+  upload-path: /usr/springuploads/

@@ -1,0 +1,27 @@
+server:
+  port: 6801
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/forum?useUnicode=true&characterEncoding=UTF8&useSSL=false
+    username: root
+    password: password
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+JWTParam:
+  cookieDomain: localhost
+  cookieSecure: false
+
+mybatis-plus:
+  configuration:
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+
+# 静态资源存储地址
+web:
+  upload-path: E:/springuploads/
