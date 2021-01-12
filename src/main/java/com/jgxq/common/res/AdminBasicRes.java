@@ -1,6 +1,5 @@
 package com.jgxq.common.res;
 
-import com.jgxq.admin.entity.Role;
 import lombok.Data;
 
 /**
@@ -8,7 +7,7 @@ import lombok.Data;
  * @since 2021-01-11
  **/
 @Data
-public class AdminRes {
+public class AdminBasicRes {
     private String adminKey;
     /**
      * 昵称
@@ -17,6 +16,6 @@ public class AdminRes {
 
     private String adminName;
 
-    private RoleRes role;
+    private String roleName;
 
 }

@@ -1,20 +1,17 @@
 package com.jgxq.admin.controller.user;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jgxq.admin.entity.Admin;
 import com.jgxq.admin.service.AdminService;
 import com.jgxq.admin.service.RoleService;
 import com.jgxq.common.define.ForumErrorCode;
-import com.jgxq.common.req.AdminRegReq;
 import com.jgxq.common.res.AdminLoginRes;
-import com.jgxq.common.res.AdminRes;
+import com.jgxq.common.res.AdminBasicRes;
 import com.jgxq.common.req.AdminLoginReq;
 import com.jgxq.common.utils.CookieUtils;
 import com.jgxq.common.utils.JwtUtil;
 import com.jgxq.common.utils.LoginUtils;
 import com.jgxq.core.anotation.UserPermissionConf;
-import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.enums.UserPermissionType;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.beans.BeanUtils;
@@ -58,7 +55,7 @@ public class AuthController {
             return new ResponseMessage(null);
         }
         Admin user = adminService.getAdminByPK("userkey", userKey);
-        AdminRes userRes = new AdminRes();
+        AdminBasicRes userRes = new AdminBasicRes();
         BeanUtils.copyProperties(user, userRes);
         return new ResponseMessage(userRes);
     }
@@ -104,8 +101,8 @@ public class AuthController {
         }
         String host = request.getServerName();
         if (!CookieUtils.LOCALHOST.equals(host)) {
-//            cookie.setDomain(host.substring(host.indexOf(".") + 1));
-            cookie.setDomain(host);
+            cookie.setDomain(host.substring(host.indexOf(".") + 1));
+//            cookie.setDomain(host);
         }
         cookie.setPath("/");
         cookie.setHttpOnly(false);
@@ -113,30 +110,8 @@ public class AuthController {
         response.setHeader("Set-Cookie", response.getHeader("Set-Cookie") + "; SameSite=Lax");
         AdminLoginRes userRes = new AdminLoginRes();
         BeanUtils.copyProperties(user, userRes);
-
+        userRes.setToken(token);
         return new ResponseMessage(userRes);
-    }
-
-
-    @PostMapping("register")
-    public ResponseMessage register(@RequestBody @Validated AdminRegReq userReq) {
-
-        if (!LoginUtils.checkPassword(userReq.getPassword())) {
-            // 判断密码规则是否合法，字母、数字、特殊字符最少2种组合（不能有中文和空格）
-            return new ResponseMessage(CommonErrorCode.BAD_PARAMETERS.getErrorCode(), "密码必须含有字母,数字,特殊字符最少两种组合!");
-        }
-
-        int count = adminService.count(new QueryWrapper<Admin>().eq("admin_name", userReq.getAdminName()));
-        if (count > 0) {
-            return new ResponseMessage(ForumErrorCode.User_Exists.getErrorCode(), "用户已存在");
-        }
-
-        String userKey = adminService.addAdmin(userReq);
-
-        if (userKey == null) {
-            return new ResponseMessage(CommonErrorCode.UNKNOWN_ERROR.getErrorCode(), "注册失败");
-        }
-        return new ResponseMessage(userKey);
     }
 
 }

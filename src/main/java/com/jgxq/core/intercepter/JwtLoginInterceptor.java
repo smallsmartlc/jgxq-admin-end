@@ -9,6 +9,7 @@ import com.jgxq.common.utils.JwtUtil;
 import com.jgxq.core.anotation.AllowAccess;
 import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.anotation.UserPermissionConf;
+import com.jgxq.core.enums.RoleType;
 import com.jgxq.core.enums.UserPermissionType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,11 +140,13 @@ public class JwtLoginInterceptor extends HandlerInterceptorAdapter {
         String permissionsStr = role==null?"[]":role.getPermissions();
         Set<String> permissions = new HashSet<>(JSON.parseArray(permissionsStr,String.class));
 
-//        对管理员权限验证
-        RolePermissionConf rolePermissionConf = handlerMethod.getMethodAnnotation(RolePermissionConf.class);
-        if(rolePermissionConf!=null && (!permissions.contains(rolePermissionConf.value()))){
-            setRespError(response, HttpStatus.FORBIDDEN.value(), "暂无该操作权限");
-            return false;
+        if(!permissions.contains(RoleType.T0000.getVal())){
+//            对管理员权限验证
+            RolePermissionConf rolePermissionConf = handlerMethod.getMethodAnnotation(RolePermissionConf.class);
+            if(rolePermissionConf!=null && (!permissions.contains(rolePermissionConf.value()))){
+                setRespError(response, HttpStatus.FORBIDDEN.value(), "暂无该操作权限");
+                return false;
+            }
         }
 
 
