@@ -2,6 +2,7 @@ package com.jgxq.admin.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jgxq.admin.entity.Admin;
 import com.jgxq.admin.entity.Role;
@@ -12,6 +13,7 @@ import com.jgxq.common.req.AdminRegReq;
 import com.jgxq.common.req.AdminUpdateReq;
 import com.jgxq.common.res.AdminBasicRes;
 import com.jgxq.common.res.AdminRes;
+import com.jgxq.common.res.RoleBasicRes;
 import com.jgxq.common.res.RoleRes;
 import com.jgxq.common.utils.LoginUtils;
 import com.jgxq.core.anotation.RolePermissionConf;
@@ -65,10 +67,12 @@ public class AdminController {
         List<AdminBasicRes> resList = adminList.stream().map(a -> {
             AdminBasicRes adminRes = new AdminBasicRes();
             BeanUtils.copyProperties(a, adminRes);
-            adminRes.setRoleName(roleMap.get(a.getId()));
-            if (adminRes.getRoleName() == null) {
-                adminRes.setRoleName("已删除角色");
+            String roleName = roleMap.get(a.getRoleId());
+            if(roleName==null){
+                roleName = "已删除角色";
             }
+            RoleBasicRes role = new RoleBasicRes(a.getRoleId(), roleName);
+            adminRes.setRole(role);
             return adminRes;
         }).collect(Collectors.toList());
         Page<AdminBasicRes> resPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
@@ -118,14 +122,15 @@ public class AdminController {
         return new ResponseMessage(flag);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("{adminKey}")
     @RolePermissionConf("0204")
     public ResponseMessage updateAdmin(@RequestBody @Validated AdminUpdateReq userReq,
-                                       @PathVariable Integer id){
+                                       @PathVariable String adminKey){
         Admin admin = new Admin();
-        admin.setId(id);
         BeanUtils.copyProperties(userReq,admin);
-        boolean flag = adminService.updateById(admin);
+        UpdateWrapper<Admin> adminUpdate = new UpdateWrapper<>();
+        adminUpdate.eq("admin_key",adminKey);
+        boolean flag = adminService.update(admin,adminUpdate);
         return new ResponseMessage(flag);
     }
 }

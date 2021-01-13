@@ -16,6 +16,6 @@ public class AdminBasicRes {
 
     private String adminName;
 
-    private String roleName;
+    private RoleBasicRes role;
 
 }

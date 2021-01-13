@@ -18,12 +18,13 @@ public class AdminRegReq {
     private String nickName;
 
     @NotBlank
+    @Size(min = 5,message = "账户名长度必须大于5")
     private String adminName;
 
     @NotBlank(message = "密码不能为空")
     @Size(min=6, max=15, message="密码长度只能在6-15之间")
     String password;
 
-    private Set<String> permissions;
+    private Integer roleId;
 
 }
