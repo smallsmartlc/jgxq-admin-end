@@ -11,14 +11,17 @@ import com.jgxq.admin.service.RoleService;
 import com.jgxq.common.define.ForumErrorCode;
 import com.jgxq.common.req.AdminRegReq;
 import com.jgxq.common.req.AdminUpdateReq;
+import com.jgxq.common.req.ResetPasswordReq;
 import com.jgxq.common.res.AdminBasicRes;
 import com.jgxq.common.res.AdminRes;
 import com.jgxq.common.res.RoleBasicRes;
 import com.jgxq.common.res.RoleRes;
 import com.jgxq.common.utils.LoginUtils;
+import com.jgxq.common.utils.PasswordHash;
 import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.enums.CommonErrorCode;
+import com.jgxq.core.exception.SmartException;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,10 +118,33 @@ public class AdminController {
         return new ResponseMessage(userKey);
     }
 
-    @DeleteMapping("{id}")
+    @RolePermissionConf("0205")
+    @PutMapping("resetPwd")
+    public ResponseMessage resetPassword(@RequestBody @Validated ResetPasswordReq resetReq){
+        String password = resetReq.getPassword();
+        String userKey = resetReq.getAdminKey();
+        if (!LoginUtils.checkPassword(password)) {
+            // 判断密码规则是否合法，字母、数字、特殊字符最少2种组合（不能有中文和空格）
+            return new ResponseMessage(CommonErrorCode.BAD_PARAMETERS.getErrorCode(), "密码必须含有字母,数字,特殊字符最少两种组合!");
+        }
+        String newPwd = null;
+        try {
+            newPwd = PasswordHash.createHash(password);
+        } catch (Exception e) {
+            throw new SmartException("密码处理异常",e);
+        }
+        UpdateWrapper<Admin> adminUpdate = new UpdateWrapper<>();
+        adminUpdate.eq("admin_key",userKey).set("password",newPwd);
+        boolean flag = adminService.update(adminUpdate);
+        return new ResponseMessage(flag);
+    }
+
+    @DeleteMapping("{userKey}")
     @RolePermissionConf("0203")
-    public ResponseMessage deleteAdmin(@PathVariable Integer id){
-        boolean flag = adminService.removeById(id);
+    public ResponseMessage deleteAdmin(@PathVariable String userKey){
+        UpdateWrapper<Admin> adminUpdate = new UpdateWrapper<>();
+        adminUpdate.eq("admin_key",userKey);
+        boolean flag = adminService.remove(adminUpdate);
         return new ResponseMessage(flag);
     }
 

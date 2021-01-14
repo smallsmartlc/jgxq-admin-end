@@ -1,5 +1,8 @@
 package com.jgxq.core.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum RoleType {
     T0000("0000","超级管理员"),
     T0101("0101","查看Dashboard"),
@@ -8,10 +11,12 @@ public enum RoleType {
     T0202("0202","增加管理员"),
     T0203("0203","删除管理员"),
     T0204("0204","编辑管理员"),
-    T0300("0300","查看用户"),
-    T0301("0301","查看用户列表"),
-    T0302("0302","编辑用户信息"),
-    T0303("0303","删除用户"),
+    T0205("0205","重置管理员密码"),
+    T0300("0300","查看角色"),
+    T0301("0301","查看角色列表"),
+    T0302("0302","添加角色"),
+    T0303("0303","删除角色"),
+    T0304("0304","编辑角色"),
     ;
 
     private String val;
@@ -29,4 +34,16 @@ public enum RoleType {
     public String getName() {
         return name;
     }
+
+    public static String getNameByCode(String code) {
+        RoleType[] values = values();
+
+        for (RoleType value : values) {
+            if(value.val.equals(code)) {
+                return value.getName();
+            }
+        }
+        return "未知权限";
+    }
+
 }

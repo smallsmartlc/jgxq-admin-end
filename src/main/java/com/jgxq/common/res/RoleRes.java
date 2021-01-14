@@ -1,11 +1,9 @@
 package com.jgxq.common.res;
 
-import lombok.AllArgsConstructor;
+import com.jgxq.admin.entity.Permission;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author LuCong
