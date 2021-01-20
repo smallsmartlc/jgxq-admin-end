@@ -9,7 +9,7 @@ import com.jgxq.common.dto.TeamInfos;
 import com.jgxq.common.req.TeamReq;
 import com.jgxq.common.res.TeamBasicRes;
 import com.jgxq.common.res.TeamRes;
-import com.jgxq.common.util.ReqUtils;
+import com.jgxq.common.utils.ReqUtils;
 import com.jgxq.core.resp.PageResponse;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.beans.BeanUtils;

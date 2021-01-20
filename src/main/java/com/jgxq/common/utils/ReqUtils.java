@@ -1,4 +1,4 @@
-package com.jgxq.common.util;
+package com.jgxq.common.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.jgxq.admin.entity.Team;
