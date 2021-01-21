@@ -94,8 +94,6 @@ public class PlayerController {
         }
         PlayerRes playerRes = new PlayerRes();
         BeanUtils.copyProperties(player, playerRes);
-        playerRes.setStrongFoot(StrongFoot.getFootByVal(player.getStrongFoot()));
-        playerRes.setPosition(Position.getPositionByVal(player.getPosition()));
         playerRes.setTeam(teamService.getBasicTeamById(player.getTeam()));
         PlayerInfos infos = JSON.parseObject(player.getInfos(),PlayerInfos.class);
         playerRes.setInfos(infos);

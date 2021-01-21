@@ -27,8 +27,8 @@ public class PlayerRes implements Serializable {
     private String nation;
     private Integer number;
     private TeamBasicRes team;
-    private String strongFoot;
-    private String position;
+    private Byte strongFoot;
+    private Byte position;
     private Date birthday;
     private PlayerInfos infos;
 

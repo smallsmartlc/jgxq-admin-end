@@ -1,7 +1,9 @@
 package com.jgxq.admin.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jgxq.admin.entity.News;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jgxq.common.res.NewsBasicRes;
 
 /**
  * <p>
@@ -12,5 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2021-01-14
  */
 public interface NewsService extends IService<News> {
-
+    Page<NewsBasicRes> pageNews(Integer pageNum, Integer pageSize);
 }
