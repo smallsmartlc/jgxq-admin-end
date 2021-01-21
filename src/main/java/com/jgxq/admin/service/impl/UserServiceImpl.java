@@ -8,9 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,5 +39,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<User> userList = userMapper.selectList(wrapper);
         Map<String, String> resMap = userList.stream().collect(Collectors.toMap(User::getUserkey, User::getNickName));
         return resMap;
+    }
+
+    public User getUserByPK(String col, String PK) {
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.eq(col, PK);
+        User user = userMapper.selectOne(wrapper);
+        return user;
+    }
+
+    public List<User> getUserByKeyList(Set<String> userKeys) {
+        if(userKeys.isEmpty()){
+            return Collections.EMPTY_LIST;
+        }
+        QueryWrapper<User> userQuery = new QueryWrapper<>();
+        userQuery.in("userkey",userKeys);
+        return userMapper.selectList(userQuery);
     }
 }
