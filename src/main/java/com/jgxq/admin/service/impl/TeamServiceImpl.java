@@ -9,6 +9,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * <p>
  *  服务实现类
@@ -30,5 +34,15 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         TeamBasicRes teamRes = new TeamBasicRes();
         BeanUtils.copyProperties(team,teamRes);
         return teamRes;
+    }
+    public List<TeamBasicRes> getBasicTeamsByIds(Collection<Integer> ids) {
+        List<Team> teams = teamMapper.selectBatchIds(ids);
+        List<TeamBasicRes> resList = teams.stream().map(t -> {
+            TeamBasicRes teamRes = new TeamBasicRes();
+            BeanUtils.copyProperties(t, teamRes);
+            return teamRes;
+        }).collect(Collectors.toList());
+
+        return resList;
     }
 }

@@ -1,33 +1,41 @@
-package com.jgxq.common.req;
+package com.jgxq.admin.entity;
 
-import com.jgxq.common.dto.PlayerInfos;
+import com.baomidou.mybatisplus.annotation.IdType;
+import java.util.Date;
+import com.baomidou.mybatisplus.annotation.TableId;
+import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.Date;
-
 /**
  * <p>
- *
+ * 
  * </p>
  *
  * @author smallsmart
- * @since 2020-12-10
+ * @since 2021-01-19
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class PlayerReq {
+public class Player implements Serializable {
 
-    @NotBlank
+    private static final long serialVersionUID = 1L;
+
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;
+
     private String name;
 
-    @NotBlank
     private String enName;
 
+    /**
+     * 头像
+     */
     private String headImage;
 
+    /**
+     * 身高-厘米
+     */
     private Integer height;
 
     /**
@@ -43,7 +51,6 @@ public class PlayerReq {
     /**
      * 号码
      */
-    @NotNull
     private Integer number;
 
     private Integer team;
@@ -51,13 +58,11 @@ public class PlayerReq {
     /**
      * 惯用脚 0右脚,1左脚,2双脚
      */
-    @NotNull
     private Byte strongFoot;
 
     /**
      * 位置 门将0,后卫1,中场2,前锋3
      */
-    @NotNull
     private Byte position;
 
     /**
@@ -68,6 +73,16 @@ public class PlayerReq {
     /**
      * 基本信息
      */
-    private PlayerInfos infos;
+    private String infos;
+
+    /**
+     * 1 正常,-1 已删除
+     */
+    private Byte status;
+
+    private Date createTime;
+
+    private Date updateTime;
+
 
 }
