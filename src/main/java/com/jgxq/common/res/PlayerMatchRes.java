@@ -14,15 +14,9 @@ import java.util.Date;
  * @since 2020-12-10
  */
 @Data
-public class PlayerBasicRes{
+public class PlayerMatchRes {
     private Integer id;
     private String name;
-    private String headImage;
-    private String nation;
     private Integer number;
-    private TeamBasicRes team;
-    private String position;
-    private Integer age;
-    private PlayerInfos infos;
-    private Date createTime;
+    private Integer matchPos;
 }

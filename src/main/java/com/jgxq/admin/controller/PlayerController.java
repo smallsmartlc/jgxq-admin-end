@@ -15,10 +15,7 @@ import com.jgxq.common.dto.PlayerInfos;
 import com.jgxq.common.dto.PlayerTeam;
 import com.jgxq.common.req.PlayerReq;
 import com.jgxq.common.req.TransferReq;
-import com.jgxq.common.res.PlayerBasicRes;
-import com.jgxq.common.res.PlayerRes;
-import com.jgxq.common.res.PlayerTeamRes;
-import com.jgxq.common.res.TeamBasicRes;
+import com.jgxq.common.res.*;
 import com.jgxq.common.utils.DateUtils;
 import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.exception.SmartException;
@@ -124,6 +121,28 @@ public class PlayerController {
         return new ResponseMessage(res);
     }
 
+    @GetMapping("match/{teamId}")
+    public ResponseMessage getMatchTeamMembers(@PathVariable("teamId") Integer teamId) {
+        QueryWrapper<Player> playQuery = new QueryWrapper<>();
+        playQuery.select("id","name","number","position")
+                .eq("team",teamId).orderByAsc("name");
+        List<Player> list = playerService.list(playQuery);
+        List<PlayerMatchRes> resList = list.stream().map(p -> {
+            //转为PlayerTeamList
+            PlayerMatchRes player = new PlayerMatchRes();
+            BeanUtils.copyProperties(p, player);
+            int pos = p.getPosition().intValue();
+            if (pos == Position.AF.getValue()) {
+                //比赛阵容多一个前腰位置,需要将前锋值处理一下
+                pos++;
+            }
+            player.setMatchPos(pos);
+            return player;
+        }).sorted(Comparator.comparing(PlayerMatchRes::getMatchPos)).collect(Collectors.toList());
+
+        return new ResponseMessage(resList);
+    }
+
     @GetMapping("page/{cur}/{size}")
     public ResponseMessage pagePlayer(@PathVariable("cur")Integer cur,
                                       @PathVariable("size") Integer size){
@@ -158,6 +177,12 @@ public class PlayerController {
         playerUpdate.set("team",transferReq.getTargetTeam());
         boolean flag = playerService.update(playerUpdate);
         return new ResponseMessage(flag);
+    }
+
+    @GetMapping("search")
+    public ResponseMessage searchPlayer(@RequestParam("keyword") String keyword){
+        List<PlayerMatchRes> list = playerService.searchPlayer(keyword);
+        return new ResponseMessage(list);
     }
 
 }

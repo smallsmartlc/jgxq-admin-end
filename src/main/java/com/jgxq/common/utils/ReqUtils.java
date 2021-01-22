@@ -1,7 +1,11 @@
 package com.jgxq.common.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.jgxq.admin.entity.Match;
 import com.jgxq.admin.entity.Team;
+import com.jgxq.common.dto.Action;
+import com.jgxq.common.dto.ActionInfo;
+import com.jgxq.common.req.MatchReq;
 import com.jgxq.common.req.TeamReq;
 import org.springframework.beans.BeanUtils;
 
@@ -16,27 +20,27 @@ import java.util.stream.Collectors;
  * @since 2020-12-11
  **/
 public class ReqUtils {
-//    public static Match matchReqToMatch(MatchReq matchReq){
-//        List<Action> oldActionList = matchReq.getAction();
-//        List<Action> actionList = new ArrayList<>();
-//        Map<String, List<ActionInfo>> map = oldActionList.stream()
-//                .collect(Collectors.toMap(a -> a.getTime(), a -> a.getInfoList()
-//                        , (o, n) -> {
-//                            o.addAll(n);
-//                            return o;
-//                        }));
-//        List<Action> finalActionList = actionList;
-//        map.forEach((k, v)-> finalActionList.add(new Action(k,v)));
-//        actionList = actionList.stream().sorted(Comparator.comparing(Action::getTime)).collect(Collectors.toList());
-//        String action = JSON.toJSONString(actionList);
-//        String matchInfo = JSON.toJSONString(matchReq.getMatchInfo());
-//        Match match = new Match();
-//        BeanUtils.copyProperties(matchReq, match);
-//        match.setAction(action);
-//        match.setMatchInfo(matchInfo);
-//
-//        return match;
-//    }
+    public static Match matchReqToMatch(MatchReq matchReq){
+        List<Action> oldActionList = matchReq.getAction();
+        List<Action> actionList = new ArrayList<>();
+        Map<String, List<ActionInfo>> map = oldActionList.stream()
+                .collect(Collectors.toMap(a -> a.getTime(), a -> a.getInfoList()
+                        , (o, n) -> {
+                            o.addAll(n);
+                            return o;
+                        }));
+        List<Action> finalActionList = actionList;
+        map.forEach((k, v)-> finalActionList.add(new Action(k,v)));
+        actionList = actionList.stream().sorted(Comparator.comparing(Action::getTime)).collect(Collectors.toList());
+        String action = JSON.toJSONString(actionList);
+        String matchInfo = JSON.toJSONString(matchReq.getMatchInfo());
+        Match match = new Match();
+        BeanUtils.copyProperties(matchReq, match);
+        match.setAction(action);
+        match.setMatchInfo(matchInfo);
+
+        return match;
+    }
 
     public static Team teamReqToTeam(TeamReq teamReq){
         String info = JSON.toJSONString(teamReq.getInfos());

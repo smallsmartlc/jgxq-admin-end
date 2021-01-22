@@ -87,7 +87,6 @@ public class NewsController {
     }
 
     @GetMapping("{id}")
-    @AllowAccess
     public ResponseMessage getNews(@PathVariable("id") Integer id) {
         QueryWrapper<News> newsQuery = new QueryWrapper<>();
         newsQuery.eq("id", id);
@@ -107,7 +106,6 @@ public class NewsController {
 
 
     @GetMapping("page/{pageNum}/{pageSize}")
-    @AllowAccess
     public ResponseMessage pageNews(@PathVariable("pageNum") Integer pageNum,
                                     @PathVariable("pageSize") Integer pageSize) {
         Page<NewsBasicRes> list = newsService.pageNews(pageNum, pageSize);
