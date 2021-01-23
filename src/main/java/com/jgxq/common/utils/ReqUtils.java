@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
  **/
 public class ReqUtils {
     public static Match matchReqToMatch(MatchReq matchReq){
-        List<Action> oldActionList = matchReq.getAction();
+        List<Action> oldActionList = matchReq.getActions();
         List<Action> actionList = new ArrayList<>();
-        Map<String, List<ActionInfo>> map = oldActionList.stream()
+        Map<Integer, List<ActionInfo>> map = oldActionList.stream()
                 .collect(Collectors.toMap(a -> a.getTime(), a -> a.getInfoList()
                         , (o, n) -> {
                             o.addAll(n);

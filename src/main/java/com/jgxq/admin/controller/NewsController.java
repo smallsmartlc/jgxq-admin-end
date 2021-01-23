@@ -112,4 +112,10 @@ public class NewsController {
         return new ResponseMessage(list);
     }
 
+    @GetMapping("search")
+    public ResponseMessage searchNews(@RequestParam("keyword") String keyword){
+        List<NewsSearchRes> list = newsService.searchPlayer(keyword);
+        return new ResponseMessage(list);
+    }
+
 }

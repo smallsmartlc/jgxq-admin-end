@@ -22,6 +22,7 @@ public class MatchBasicRes {
     private TeamBasicRes visitingTeam;
     private Integer visitingScore;
     private Date startTime;
+    private Date createTime;
     private String link;
 
 }

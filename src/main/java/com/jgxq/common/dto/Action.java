@@ -14,6 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Action {
-    private String time;
+    private Integer time;
     private List<ActionInfo> infoList;
 }

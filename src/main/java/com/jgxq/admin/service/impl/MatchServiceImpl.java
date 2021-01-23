@@ -36,8 +36,6 @@ public class MatchServiceImpl extends ServiceImpl<MatchMapper, Match> implements
     @Override
     public Page<MatchBasicRes> listMatches(Date start, String teamId, Integer pageNum, Integer pageSize) {
         QueryWrapper<Match> matchQuery = new QueryWrapper<>();
-
-        matchQuery.select("id", "title", "home_team", "visiting_team", "start_time", "link","home_score","visiting_score");
         if (start == null) {
             matchQuery.orderByDesc("start_time");
         } else {

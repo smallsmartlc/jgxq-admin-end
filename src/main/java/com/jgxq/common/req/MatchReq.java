@@ -36,6 +36,6 @@ public class MatchReq implements Serializable {
     private String link;
     private Integer matchNews;
     private MatchInfo matchInfo;
-    private List<Action> action;
+    private List<Action> actions;
 
 }

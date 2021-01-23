@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -180,7 +181,7 @@ public class PlayerController {
     }
 
     @GetMapping("search")
-    public ResponseMessage searchPlayer(@RequestParam("keyword") String keyword){
+    public ResponseMessage searchPlayer(@RequestParam("keyword") @NotBlank String keyword){
         List<PlayerMatchRes> list = playerService.searchPlayer(keyword);
         return new ResponseMessage(list);
     }

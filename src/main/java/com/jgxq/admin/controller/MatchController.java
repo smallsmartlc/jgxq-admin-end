@@ -86,8 +86,10 @@ public class MatchController {
         NewsBasicRes newsBasic = null;
         if(match.getMatchNews()!=null){
             News news = newsService.getById(match.getMatchNews());
-            newsBasic = new NewsBasicRes();
-            BeanUtils.copyProperties(news,newsBasic);
+            if(news !=null){
+                newsBasic = new NewsBasicRes();
+                BeanUtils.copyProperties(news,newsBasic);
+            }
         }
         res.setMatchNews(newsBasic);
 
