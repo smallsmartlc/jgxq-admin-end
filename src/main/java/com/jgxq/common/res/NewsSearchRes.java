@@ -17,6 +17,5 @@ public class NewsSearchRes {
 
     private Integer id;
     private String title;
-
     private String cover;
 }

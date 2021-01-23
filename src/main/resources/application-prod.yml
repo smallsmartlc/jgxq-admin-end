@@ -7,6 +7,10 @@ spring:
     url: jdbc:mysql://smallsmart.top/forum?useUnicode=true&characterEncoding=UTF8&useSSL=false
     username: root
     password: password
+  redis:
+    host: smallsmart.top
+    port: 6379
+    password: lc200009
 
 JWTParam:
   cookieDomain: admin.smallsmart.top

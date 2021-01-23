@@ -14,13 +14,14 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author smallsmart
@@ -39,7 +40,7 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
     public Page<NewsBasicRes> pageNews(Integer pageNum, Integer pageSize) {
         Page<News> page = new Page<>(pageNum, pageSize);
         QueryWrapper<News> wrapper = new QueryWrapper<>();
-        wrapper.select("id", "title", "cover","author","create_at").orderByDesc("create_at");
+        wrapper.select("id", "title", "cover", "author", "create_at").orderByDesc("create_at");
         newsMapper.selectPage(page, wrapper);
         List<News> newsList = page.getRecords();
         List<String> userKeys = newsList.stream().map(News::getAuthor).collect(Collectors.toList());
@@ -58,7 +59,7 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
     @Override
     public List<NewsSearchRes> searchPlayer(String keyword) {
         QueryWrapper<News> wrapper = new QueryWrapper<>();
-        wrapper.like("title",keyword).orderByAsc("LENGTH(title)");
+        wrapper.like("title", keyword).orderByAsc("LENGTH(title)");
         List<News> list = newsMapper.selectList(wrapper);
         List<NewsSearchRes> res = list.stream().map(n -> {
             NewsSearchRes temp = new NewsSearchRes();
@@ -67,6 +68,21 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
         }).collect(Collectors.toList());
         return res;
     }
+
+    @Override
+    public List<NewsSearchRes> listNewsInIds(List<Integer> ids) {
+        if (ids.isEmpty()) return Collections.emptyList();
+        QueryWrapper<News> wrapper = new QueryWrapper<>();
+        wrapper.select("id", "title", "cover").in("id",ids).orderByDesc("create_at");
+        List<News> newsList = newsMapper.selectList(wrapper);
+        List<NewsSearchRes> res = newsList.stream().map(n -> {
+            NewsSearchRes temp = new NewsSearchRes();
+            BeanUtils.copyProperties(n, temp);
+            return temp;
+        }).collect(Collectors.toList());
+        return res;
+    }
+
     public List<NewsSearchRes> searchPlayerEs(String keyword) {
         //TODO 使用es搜索
         return null;

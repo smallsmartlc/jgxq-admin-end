@@ -21,4 +21,6 @@ public interface NewsService extends IService<News> {
     Page<NewsBasicRes> pageNews(Integer pageNum, Integer pageSize);
 
     List<NewsSearchRes> searchPlayer(String keyword);
+
+    List<NewsSearchRes> listNewsInIds(List<Integer> ids);
 }

@@ -4,19 +4,17 @@ package com.jgxq.front.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jgxq.admin.client.RedisCache;
 import com.jgxq.admin.entity.News;
 import com.jgxq.admin.entity.Tag;
 import com.jgxq.admin.service.NewsService;
-import com.jgxq.admin.service.TagService;
-import com.jgxq.admin.service.impl.NewsServiceImpl;
 import com.jgxq.admin.service.impl.TagServiceImpl;
-import com.jgxq.admin.service.impl.TeamServiceImpl;
 import com.jgxq.admin.service.impl.UserServiceImpl;
 import com.jgxq.common.req.NewsReq;
 import com.jgxq.common.res.*;
-import com.jgxq.core.anotation.AllowAccess;
 import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.enums.CommonErrorCode;
+import com.jgxq.core.enums.RedisKeys;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +46,9 @@ public class NewsController {
 
     @Autowired
     private TagServiceImpl tagService;
+
+    @Autowired
+    private RedisCache redisCache;
 
     @PutMapping("{id}")
     @Transactional
@@ -110,6 +110,23 @@ public class NewsController {
                                     @PathVariable("pageSize") Integer pageSize) {
         Page<NewsBasicRes> list = newsService.pageNews(pageNum, pageSize);
         return new ResponseMessage(list);
+    }
+
+    @GetMapping("top")
+    public ResponseMessage topNews() {
+        List<Integer> ids = redisCache.lrangeInt(RedisKeys.top_news.getKey());
+        List<NewsSearchRes> res = newsService.listNewsInIds(ids);
+        return new ResponseMessage(res);
+    }
+    @PostMapping("top/{id}")
+    public ResponseMessage addTop(@PathVariable("id") Integer id) {
+        Long flag = redisCache.lPush(RedisKeys.top_news.getKey(), id);
+        return new ResponseMessage(flag>0);
+    }
+    @DeleteMapping("top/{id}")
+    public ResponseMessage deleteTop(@PathVariable("id") Integer id) {
+        Long flag = redisCache.lRem(RedisKeys.top_news.getKey(), id);
+        return new ResponseMessage(flag>0);
     }
 
     @GetMapping("search")
