@@ -212,7 +212,7 @@ public class JwtLoginInterceptor extends HandlerInterceptorAdapter {
         // 将用户信息放进request中
         //  待优化传userkey方式
         //  优化完成,使用@RequestAttribute接收
-        return null;
+        return admin.getAdminKey();
     }
 
 }

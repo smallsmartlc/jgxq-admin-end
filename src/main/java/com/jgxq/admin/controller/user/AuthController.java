@@ -1,18 +1,23 @@
 package com.jgxq.admin.controller.user;
 
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.jgxq.admin.entity.Admin;
 import com.jgxq.admin.service.AdminService;
 import com.jgxq.admin.service.RoleService;
 import com.jgxq.common.define.ForumErrorCode;
+import com.jgxq.common.req.AdminFindReq;
 import com.jgxq.common.res.AdminLoginRes;
 import com.jgxq.common.res.AdminBasicRes;
 import com.jgxq.common.req.AdminLoginReq;
 import com.jgxq.common.utils.CookieUtils;
 import com.jgxq.common.utils.JwtUtil;
 import com.jgxq.common.utils.LoginUtils;
+import com.jgxq.common.utils.PasswordHash;
 import com.jgxq.core.anotation.UserPermissionConf;
+import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.enums.UserPermissionType;
+import com.jgxq.core.exception.SmartException;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +117,38 @@ public class AuthController {
         BeanUtils.copyProperties(user, userRes);
         userRes.setToken(token);
         return new ResponseMessage(userRes);
+    }
+
+    @PutMapping("resetPwd")
+    public ResponseMessage resetPwd(@RequestAttribute(value = "userKey", required = false) String userKey,
+                                    @RequestBody @Validated AdminFindReq userReq) {
+        if (!(LoginUtils.checkPassword(userReq.getPassword())&&LoginUtils.checkPassword(userReq.getOldPassword()))) {
+            // 判断密码规则是否合法，字母、数字、特殊字符最少2种组合（不能有中文和空格）
+            return new ResponseMessage(CommonErrorCode.BAD_PARAMETERS.getErrorCode(), "密码必须含有字母,数字,特殊字符最少两种组合!");
+        }
+        Admin admin = adminService.getAdminByPK("admin_key", userKey);
+        if (admin == null) {
+            return new ResponseMessage(CommonErrorCode.BAD_PARAMETERS.getErrorCode(),"该用户不存在");
+        }
+        boolean equal;
+        try {
+            equal = PasswordHash.validatePassword(userReq.getOldPassword(), admin.getPassword());
+        } catch (Exception e) {
+            return new ResponseMessage(CommonErrorCode.INTERNAL_SERVER_ERROR.getErrorCode(),"校验出现错误");
+        }
+        if(!equal){
+            return new ResponseMessage(CommonErrorCode.BAD_PARAMETERS.getErrorCode(),"旧密码错误");
+        }
+        try {
+            userReq.setPassword(PasswordHash.createHash(userReq.getPassword()));
+        } catch (Exception e) {
+            return new ResponseMessage(CommonErrorCode.INTERNAL_SERVER_ERROR.getErrorCode(),"jwt错误");
+        }
+        UpdateWrapper<Admin> wrapper = new UpdateWrapper<>();
+        wrapper.eq("admin_key", userKey)
+                .set("password", userReq.getPassword());
+        Boolean flag = adminService.update(wrapper);
+        return new ResponseMessage(flag);
     }
 
 }

@@ -70,8 +70,11 @@ public class RoleController {
 
     @RolePermissionConf("0302")
     @PostMapping("")
-    public ResponseMessage addRole(@RequestBody @Validated RoleReq roleReq){;
-        String permissionStr = JSON.toJSONString(roleReq.getPermissions());
+    public ResponseMessage addRole(@RequestBody @Validated RoleReq roleReq){
+
+        Set<String> permissions = roleReq.getPermissions();
+        permissions.remove(RoleType.T0000.getVal());
+        String permissionStr = JSON.toJSONString(permissions);
         Role role = new Role();
         role.setPermissions(permissionStr);
         BeanUtils.copyProperties(roleReq,role);
@@ -85,7 +88,9 @@ public class RoleController {
                                     @PathVariable Integer id){
         Role role = new Role();
         BeanUtils.copyProperties(roleReq,role);
-        String permissionStr = JSON.toJSONString(roleReq.getPermissions());
+        Set<String> permissions = roleReq.getPermissions();
+        permissions.remove(RoleType.T0000.getVal());
+        String permissionStr = JSON.toJSONString(permissions);
         role.setPermissions(permissionStr);
         role.setId(id);
         boolean flag = roleService.updateById(role);

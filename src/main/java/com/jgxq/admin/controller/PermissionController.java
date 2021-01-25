@@ -23,6 +23,9 @@ public class PermissionController {
         RoleType[] values = RoleType.values();
         List<Permission> resList = new ArrayList<>();
         for (RoleType value : values) {
+            if(value == RoleType.T0000){
+                continue;
+            }
             Permission permission = new Permission();
             permission.setCode(value.getVal());
             permission.setName(value.getName());
