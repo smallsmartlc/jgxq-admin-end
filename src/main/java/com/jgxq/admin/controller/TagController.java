@@ -3,6 +3,7 @@ package com.jgxq.admin.controller;
 
 import com.jgxq.admin.service.TagService;
 import com.jgxq.common.res.TagSearchRes;
+import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("tag")
+@UserPermissionConf
 public class TagController {
 
     @Autowired

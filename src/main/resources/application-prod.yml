@@ -13,7 +13,7 @@ spring:
     password: lc200009
 
 JWTParam:
-  cookieDomain: admin.smallsmart.top
+  cookieDomain: smallsmart.top
   cookieSecure: false
 
 # 静态资源存储地址

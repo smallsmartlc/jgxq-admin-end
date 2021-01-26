@@ -10,6 +10,8 @@ import com.jgxq.common.req.TeamReq;
 import com.jgxq.common.res.TeamBasicRes;
 import com.jgxq.common.res.TeamRes;
 import com.jgxq.common.utils.ReqUtils;
+import com.jgxq.core.anotation.RolePermissionConf;
+import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.resp.PageResponse;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.beans.BeanUtils;
@@ -29,11 +31,13 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/team")
+@UserPermissionConf
 public class TeamController {
 
     @Autowired
     private TeamService teamService;
 
+    @RolePermissionConf("0502")
     @PostMapping
     public ResponseMessage addTeam(@RequestBody @Validated TeamReq teamReq) {
 
@@ -43,6 +47,7 @@ public class TeamController {
         return new ResponseMessage(team.getId());
     }
 
+    @RolePermissionConf("0504")
     @PutMapping("{id}")
     public ResponseMessage updateTeamInfo(@PathVariable("id") Integer id,
                                           @RequestBody @Validated TeamReq teamReq) {
@@ -53,12 +58,14 @@ public class TeamController {
         return new ResponseMessage(flag);
     }
 
+    @RolePermissionConf("0503")
     @DeleteMapping("{id}")
     public ResponseMessage deleteTeamById(@PathVariable("id") Integer id) {
         boolean flag = teamService.removeById(id);
         return new ResponseMessage(flag);
     }
 
+    @RolePermissionConf("0501")
     @GetMapping("page/{pageNum}/{pageSize}")
     public ResponseMessage PageTeams(@PathVariable("pageNum") Integer pageNum,
                                      @PathVariable("pageSize") Integer pageSize) {
@@ -77,6 +84,7 @@ public class TeamController {
 
     }
 
+    @RolePermissionConf("0500")
     @GetMapping("infos/{id}")
     public ResponseMessage getTeamById(@PathVariable("id") Integer id) {
         Team team = teamService.getById(id);

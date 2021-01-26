@@ -1,6 +1,7 @@
 package com.jgxq.admin.controller;
 
 import com.jgxq.admin.entity.Permission;
+import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.enums.RoleType;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("permission")
+@UserPermissionConf
 public class PermissionController {
 
     @GetMapping("list")

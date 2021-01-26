@@ -15,6 +15,8 @@ import com.jgxq.common.res.UserRes;
 import com.jgxq.common.req.UserUpdateReq;
 import com.jgxq.common.utils.LoginUtils;
 import com.jgxq.common.utils.PasswordHash;
+import com.jgxq.core.anotation.RolePermissionConf;
+import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.exception.SmartException;
 import com.jgxq.core.resp.ResponseMessage;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/user")
+@UserPermissionConf
 public class UserController {
 
     @Autowired
@@ -48,6 +51,7 @@ public class UserController {
     private TeamServiceImpl teamService;
 
     @GetMapping("page/{cur}/{size}")
+    @RolePermissionConf("0401")
     private ResponseMessage pageUser(@PathVariable Integer cur,
                                      @PathVariable Integer size,
                                      @RequestParam(value = "keyWord",required = false) String keyWord){
@@ -80,6 +84,7 @@ public class UserController {
         return new ResponseMessage(resPage);
     }
 
+    @RolePermissionConf("0402")
     @PutMapping("{userKey}")
     private ResponseMessage updateUser(@PathVariable String userKey,
                                        @RequestBody UserUpdateReq userReq){
@@ -93,6 +98,7 @@ public class UserController {
     }
 
     @PutMapping("/resetPwd/{userKey}")
+    @RolePermissionConf("0403")
     private ResponseMessage updateUser(@PathVariable String userKey){
         String password = "abc123";
         if (!LoginUtils.checkPassword(password)) {

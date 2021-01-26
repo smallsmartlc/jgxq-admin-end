@@ -9,6 +9,7 @@ import com.jgxq.admin.service.TalkService;
 import com.jgxq.admin.service.impl.UserServiceImpl;
 import com.jgxq.common.res.TalkRes;
 import com.jgxq.core.anotation.AllowAccess;
+import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.resp.ResponseMessage;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +41,7 @@ public class TalkController {
     @Autowired
     private UserServiceImpl userService;
 
+    @RolePermissionConf("0902")
     @PostMapping
     public ResponseMessage addTalk(@RequestParam String text,
                                    @RequestAttribute("userKey") String userKey) {
@@ -50,6 +52,7 @@ public class TalkController {
         return new ResponseMessage(talk.getId());
     }
 
+    @RolePermissionConf("0903")
     @DeleteMapping("{id}")
     public ResponseMessage deleteTalk(@PathVariable("id") Integer id,
                                       @RequestAttribute("userKey") String userKey) {
@@ -61,6 +64,7 @@ public class TalkController {
         return new ResponseMessage(flag);
     }
 
+    @RolePermissionConf("0900")
     @GetMapping("{id}")
     public ResponseMessage getTalk(@PathVariable Integer id,
                                    @RequestAttribute("userKey") String userKey) {
@@ -74,6 +78,7 @@ public class TalkController {
         return new ResponseMessage(talkRes);
     }
 
+    @RolePermissionConf("0901")
     @GetMapping("/page/{pageNum}/{pageSize}")
     @AllowAccess
     public ResponseMessage pageTalk(@PathVariable("pageNum") Integer pageNum,

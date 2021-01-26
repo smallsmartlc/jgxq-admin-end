@@ -17,6 +17,7 @@ import com.jgxq.common.req.PlayerReq;
 import com.jgxq.common.req.TransferReq;
 import com.jgxq.common.res.*;
 import com.jgxq.common.utils.DateUtils;
+import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.exception.SmartException;
 import com.jgxq.core.resp.ResponseMessage;
@@ -50,6 +51,7 @@ public class PlayerController {
     @Autowired
     private TeamServiceImpl teamService;
 
+    @RolePermissionConf("0602")
     @PostMapping
     public ResponseMessage addPlayer(@RequestBody @Validated PlayerReq playerReq) {
         String infos = JSON.toJSONString(playerReq.getInfos());
@@ -63,6 +65,7 @@ public class PlayerController {
         return new ResponseMessage(player.getId());
     }
 
+    @RolePermissionConf("0604")
     @PutMapping("{id}")
     public ResponseMessage updatePlayer(@PathVariable("id") Integer id,
                                         @RequestBody @Validated PlayerReq playerReq) {
@@ -78,12 +81,14 @@ public class PlayerController {
         return new ResponseMessage(flag);
     }
 
+    @RolePermissionConf("0603")
     @DeleteMapping("{id}")
     public ResponseMessage deletePlayer(@PathVariable("id") Integer id) {
         boolean flag = playerService.removeById(id);
         return new ResponseMessage(flag);
     }
 
+    @RolePermissionConf("0600")
     @GetMapping("{id}")
     public ResponseMessage getPlayerById(@PathVariable("id") Integer id) {
         Player player = playerService.getById(id);
@@ -98,6 +103,7 @@ public class PlayerController {
         return new ResponseMessage(playerRes);
     }
 
+    @RolePermissionConf("0505")
     @GetMapping("team/{teamId}")
     public ResponseMessage getTeamMembers(@PathVariable("teamId") Integer teamId) {
         QueryWrapper<Player> playQuery = new QueryWrapper<>();
@@ -122,6 +128,7 @@ public class PlayerController {
         return new ResponseMessage(res);
     }
 
+    @RolePermissionConf("0505")
     @GetMapping("match/{teamId}")
     public ResponseMessage getMatchTeamMembers(@PathVariable("teamId") Integer teamId) {
         QueryWrapper<Player> playQuery = new QueryWrapper<>();
@@ -144,6 +151,7 @@ public class PlayerController {
         return new ResponseMessage(resList);
     }
 
+    @RolePermissionConf("0601")
     @GetMapping("page/{cur}/{size}")
     public ResponseMessage pagePlayer(@PathVariable("cur")Integer cur,
                                       @PathVariable("size") Integer size){
@@ -168,6 +176,7 @@ public class PlayerController {
         return new ResponseMessage(resPage);
     }
 
+    @RolePermissionConf("0602")
     @PutMapping("transfer")
     public ResponseMessage transfer(@RequestBody TransferReq transferReq){
         UpdateWrapper<Player> playerUpdate = new UpdateWrapper<>();

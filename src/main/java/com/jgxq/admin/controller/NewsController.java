@@ -12,6 +12,7 @@ import com.jgxq.admin.service.impl.TagServiceImpl;
 import com.jgxq.admin.service.impl.UserServiceImpl;
 import com.jgxq.common.req.NewsReq;
 import com.jgxq.common.res.*;
+import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.enums.RedisKeys;
@@ -50,6 +51,7 @@ public class NewsController {
     @Autowired
     private RedisCache redisCache;
 
+    @RolePermissionConf("0804")
     @PutMapping("{id}")
     @Transactional
     public ResponseMessage updateNews(@PathVariable("id") Integer id,
@@ -75,6 +77,7 @@ public class NewsController {
         return new ResponseMessage(flag);
     }
 
+    @RolePermissionConf("0803")
     @DeleteMapping("{id}")
     public ResponseMessage deleteNews(@PathVariable("id") Integer id) {
         UpdateWrapper<News> newsUpdate = new UpdateWrapper<>();
@@ -86,6 +89,7 @@ public class NewsController {
         return new ResponseMessage(flag);
     }
 
+    @RolePermissionConf("0800")
     @GetMapping("{id}")
     public ResponseMessage getNews(@PathVariable("id") Integer id) {
         QueryWrapper<News> newsQuery = new QueryWrapper<>();
@@ -104,7 +108,7 @@ public class NewsController {
         return new ResponseMessage(newsRes);
     }
 
-
+    @RolePermissionConf("0801")
     @GetMapping("page/{pageNum}/{pageSize}")
     public ResponseMessage pageNews(@PathVariable("pageNum") Integer pageNum,
                                     @PathVariable("pageSize") Integer pageSize) {
@@ -112,17 +116,22 @@ public class NewsController {
         return new ResponseMessage(list);
     }
 
+    @RolePermissionConf("0805")
     @GetMapping("top")
     public ResponseMessage topNews() {
         List<Integer> ids = redisCache.lrangeInt(RedisKeys.top_news.getKey());
         List<NewsSearchRes> res = newsService.listNewsInIds(ids);
         return new ResponseMessage(res);
     }
+
+    @RolePermissionConf("0806")
     @PostMapping("top/{id}")
     public ResponseMessage addTop(@PathVariable("id") Integer id) {
         Long flag = redisCache.lPush(RedisKeys.top_news.getKey(), id);
         return new ResponseMessage(flag>0);
     }
+
+    @RolePermissionConf("0807")
     @DeleteMapping("top/{id}")
     public ResponseMessage deleteTop(@PathVariable("id") Integer id) {
         Long flag = redisCache.lRem(RedisKeys.top_news.getKey(), id);

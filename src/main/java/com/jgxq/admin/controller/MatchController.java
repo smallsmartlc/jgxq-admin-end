@@ -11,6 +11,7 @@ import com.jgxq.common.res.TeamBasicRes;
 import com.jgxq.common.utils.DateUtils;
 import com.jgxq.common.utils.ReqUtils;
 import com.jgxq.common.utils.ResUtils;
+import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.resp.ResponseMessage;
 import com.jgxq.admin.entity.Match;
 import com.jgxq.admin.entity.News;
@@ -49,6 +50,7 @@ public class MatchController {
     @Autowired
     private NewsServiceImpl newsService;
 
+    @RolePermissionConf("0702")
     @PostMapping
     public ResponseMessage addMatch(@RequestBody @Validated MatchReq matchReq) {
 
@@ -58,6 +60,7 @@ public class MatchController {
         return new ResponseMessage(match.getId());
     }
 
+    @RolePermissionConf("0704")
     @PutMapping("{id}")
     public ResponseMessage updateMatch(@PathVariable("id") Integer id,
                                        @RequestBody @Validated MatchReq matchReq) {
@@ -69,12 +72,14 @@ public class MatchController {
         return new ResponseMessage(flag);
     }
 
+    @RolePermissionConf("0703")
     @DeleteMapping("{id}")
     public ResponseMessage deleteMatch(@PathVariable("id") Integer id) {
         boolean remove = matchService.removeById(id);
         return new ResponseMessage(remove);
     }
 
+    @RolePermissionConf("0700")
     @GetMapping("{id}")
     public ResponseMessage getMatch(@PathVariable("id") Integer id) {
         Match match = matchService.getById(id);
@@ -101,6 +106,7 @@ public class MatchController {
         return new ResponseMessage(res);
     }
 
+    @RolePermissionConf("0701")
     @GetMapping("/page")
     public ResponseMessage PageMatches(@RequestParam(value = "start", required = false) Date start,
                                        @RequestParam(value = "teamId", required = false) String teamId,
