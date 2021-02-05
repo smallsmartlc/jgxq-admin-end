@@ -8,7 +8,7 @@ import lombok.Data;
  **/
 @Data
 public class TagSearchRes {
-    private Integer ObjectId;
+    private Integer objectId;
     private Integer type;
     private String name;
     private String logo;
