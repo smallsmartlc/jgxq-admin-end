@@ -10,6 +10,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jgxq.common.res.NewsBasicRes;
 import com.jgxq.common.res.NewsSearchRes;
 import com.jgxq.common.res.PlayerMatchRes;
+import com.jgxq.common.res.TagSearchRes;
+import com.sun.xml.internal.bind.v2.TODO;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,7 +64,7 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
     }
 
     @Override
-    public List<NewsSearchRes> searchPlayer(String keyword) {
+    public List<NewsSearchRes> searchNews(String keyword) {
         QueryWrapper<News> wrapper = new QueryWrapper<>();
         wrapper.like("title", keyword).orderByAsc("LENGTH(title)");
         List<News> list = newsMapper.selectList(wrapper);
@@ -83,8 +90,18 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
         return res;
     }
 
-    public List<NewsSearchRes> searchPlayerEs(String keyword) {
-        //TODO 使用es搜索
+    private List<NewsSearchRes> searchNewsEs(String keyword) {
+        //TODO
+//        SearchSourceBuilder builder = new SearchSourceBuilder();
+//
+//        MatchPhraseQueryBuilder matchPhraseQuery = QueryBuilders.matchPhraseQuery("name.pinyin", keyword);
+//        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("type",).termQuery("status", 1);
+//        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+//        boolQueryBuilder.must(matchPhraseQuery);
+//        boolQueryBuilder.must(termQueryBuilder);
+//
+//        builder.query(boolQueryBuilder);
+//        List<TagSearchRes> resList = esClient.search("jgxq_tag", builder, TagSearchRes.class, 10);
         return null;
     }
 

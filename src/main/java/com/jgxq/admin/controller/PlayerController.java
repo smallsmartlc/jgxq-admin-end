@@ -191,7 +191,7 @@ public class PlayerController {
 
     @GetMapping("search")
     public ResponseMessage searchPlayer(@RequestParam("keyword") @NotBlank String keyword){
-        List<PlayerMatchRes> list = playerService.searchPlayer(keyword);
+        List<PlayerSearchRes> list = playerService.searchPlayer(keyword);
         return new ResponseMessage(list);
     }
 

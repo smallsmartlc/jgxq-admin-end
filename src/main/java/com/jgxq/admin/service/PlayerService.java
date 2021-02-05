@@ -3,6 +3,7 @@ package com.jgxq.admin.service;
 import com.jgxq.admin.entity.Player;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jgxq.common.res.PlayerMatchRes;
+import com.jgxq.common.res.PlayerSearchRes;
 
 import java.util.List;
 
@@ -16,5 +17,5 @@ import java.util.List;
  */
 public interface PlayerService extends IService<Player> {
 
-    List<PlayerMatchRes> searchPlayer(String keyword);
+    List<PlayerSearchRes> searchPlayer(String keyword);
 }
