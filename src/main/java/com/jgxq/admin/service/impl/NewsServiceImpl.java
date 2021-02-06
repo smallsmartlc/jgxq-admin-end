@@ -2,6 +2,7 @@ package com.jgxq.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jgxq.admin.client.EsUtils;
 import com.jgxq.admin.entity.News;
 import com.jgxq.admin.entity.Player;
 import com.jgxq.admin.mapper.NewsMapper;
@@ -12,10 +13,7 @@ import com.jgxq.common.res.NewsSearchRes;
 import com.jgxq.common.res.PlayerMatchRes;
 import com.jgxq.common.res.TagSearchRes;
 import com.sun.xml.internal.bind.v2.TODO;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +41,9 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
     @Autowired
     private UserServiceImpl userService;
 
+    @Autowired
+    private EsUtils esClient;
+
     @Override
     public Page<NewsBasicRes> pageNews(Integer pageNum, Integer pageSize) {
         Page<News> page = new Page<>(pageNum, pageSize);
@@ -64,10 +65,29 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
     }
 
     @Override
+    public Page<NewsBasicRes> pageNewsEs(Integer pageNum, Integer pageSize, String keyword) {
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+
+        MatchQueryBuilder matchQuery1 = QueryBuilders.matchQuery("title", keyword);
+        MatchQueryBuilder matchQuery2 = QueryBuilders.matchQuery("text", keyword);
+        matchQuery1.boost(2);
+        matchQuery2.boost(1);
+
+        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("status", 1);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(termQueryBuilder);
+        boolQueryBuilder.must(new BoolQueryBuilder().should(matchQuery1).should(matchQuery2));
+
+        builder.query(boolQueryBuilder);
+        Page<NewsBasicRes> resPage = esClient.search("jgxq_news", builder, NewsBasicRes.class, pageNum,pageSize);
+        return resPage;
+    }
+
+    @Override
     public List<NewsSearchRes> searchNews(String keyword) {
-        QueryWrapper<News> wrapper = new QueryWrapper<>();
-        wrapper.like("title", keyword).orderByAsc("LENGTH(title)");
-        List<News> list = newsMapper.selectList(wrapper);
+//        QueryWrapper<News> wrapper = new QueryWrapper<>();
+//        wrapper.like("title", keyword).orderByAsc("LENGTH(title)");
+        List<News> list = searchNewsEs(keyword);
         List<NewsSearchRes> res = list.stream().map(n -> {
             NewsSearchRes temp = new NewsSearchRes();
             BeanUtils.copyProperties(n, temp);
@@ -90,19 +110,22 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
         return res;
     }
 
-    private List<NewsSearchRes> searchNewsEs(String keyword) {
-        //TODO
-//        SearchSourceBuilder builder = new SearchSourceBuilder();
-//
-//        MatchPhraseQueryBuilder matchPhraseQuery = QueryBuilders.matchPhraseQuery("name.pinyin", keyword);
-//        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("type",).termQuery("status", 1);
-//        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-//        boolQueryBuilder.must(matchPhraseQuery);
-//        boolQueryBuilder.must(termQueryBuilder);
-//
-//        builder.query(boolQueryBuilder);
-//        List<TagSearchRes> resList = esClient.search("jgxq_tag", builder, TagSearchRes.class, 10);
-        return null;
+    private List<News> searchNewsEs(String keyword) {
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+
+        MatchQueryBuilder matchQuery1 = QueryBuilders.matchQuery("title", keyword);
+        MatchQueryBuilder matchQuery2 = QueryBuilders.matchQuery("text", keyword);
+        matchQuery1.boost(2);
+        matchQuery2.boost(1);
+
+        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("status", 1);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(termQueryBuilder);
+        boolQueryBuilder.must(new BoolQueryBuilder().should(matchQuery1).should(matchQuery2));
+
+        builder.query(boolQueryBuilder);
+        List<News> resList = esClient.search("jgxq_news", builder, News.class, 10);
+        return resList;
     }
 
 }

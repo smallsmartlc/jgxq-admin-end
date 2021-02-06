@@ -2,7 +2,6 @@ package com.jgxq.admin.controller;
 
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jgxq.admin.entity.Team;
 import com.jgxq.admin.service.TeamService;
 import com.jgxq.common.dto.TeamInfos;
@@ -12,7 +11,7 @@ import com.jgxq.common.res.TeamRes;
 import com.jgxq.common.utils.ReqUtils;
 import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.anotation.UserPermissionConf;
-import com.jgxq.core.resp.PageResponse;
+import com.jgxq.core.resp.Page;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +69,7 @@ public class TeamController {
     public ResponseMessage PageTeams(@PathVariable("pageNum") Integer pageNum,
                                      @PathVariable("pageSize") Integer pageSize) {
 
-        Page<Team> page = new Page<>(pageNum,pageSize);
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page(pageNum,pageSize);
         teamService.page(page);
         List<Team> records = page.getRecords();
         List<TeamBasicRes> res = new ArrayList<>(records.size());
@@ -80,7 +79,7 @@ public class TeamController {
             res.add(teamBasic);
         });
 
-        return new ResponseMessage(new PageResponse(res, pageNum, pageSize, page.getTotal()));
+        return new ResponseMessage(new Page(res, pageNum, pageSize, page.getTotal()));
 
     }
 

@@ -1,8 +1,8 @@
 package com.jgxq.admin.client;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jgxq.core.exception.SmartException;
-import com.jgxq.core.resp.PageResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -13,10 +13,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -49,33 +46,37 @@ public class EsUtils {
      * @param pageSize
      * @return PageResponse<T>
      */
-    public  <T> PageResponse<T> search(String index, SearchSourceBuilder searchSourceBuilder, Class<T> clazz, Integer pageNum, Integer pageSize){
+    public <T> Page<T> search(String index, SearchSourceBuilder searchSourceBuilder, Class<T> clazz, Integer pageNum, Integer pageSize){
         SearchRequest searchRequest = new SearchRequest(index);
         searchRequest.types(esType);
+        int from = pageSize * (pageNum - 1);
+        searchSourceBuilder.size(pageSize).from(from);
         searchRequest.source(searchSourceBuilder);
         SearchResponse response = null;
-        PageResponse<T> pageResponse = null;
+        Page<T> page = null;
         try {
             response = esClient.search(searchRequest, RequestOptions.DEFAULT);
-            pageResponse = new PageResponse<>();
-            pageResponse.setPage(pageNum);
-            pageResponse.setPageSize(pageSize);
-            pageResponse.setTotal(response.getHits().getTotalHits().value);
+            System.out.println(searchRequest.source().toString());
+            page = new Page<>();
+            page.setCurrent(pageNum);
+            page.setSize(pageSize);
+            page.setTotal(response.getHits().getTotalHits().value);
             List<T> dataList = new ArrayList<>();
             SearchHits hits = response.getHits();
             for(SearchHit hit : hits){
                 dataList.add(JSONObject.parseObject(hit.getSourceAsString(), clazz));
             }
-            pageResponse.setData(dataList);
+            page.setRecords(dataList);
         } catch (Exception e) {
             throw new SmartException(String.valueOf(HttpStatus.BAD_REQUEST), "error to execute searching,because of " + e.getMessage());
         }
-        return pageResponse;
+        return page;
     }
 
     public  <T> List<T> search(String index, SearchSourceBuilder searchSourceBuilder, Class<T> clazz, Integer pageSize){
         SearchRequest searchRequest = new SearchRequest(index);
         searchRequest.types(esType);
+        searchSourceBuilder.size(pageSize);
         searchRequest.source(searchSourceBuilder);
         SearchResponse response = null;
         List<T> dataList = null;

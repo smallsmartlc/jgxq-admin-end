@@ -1,4 +1,4 @@
-package com.jgxq.front.controller;
+package com.jgxq.admin.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -17,6 +17,7 @@ import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.enums.RedisKeys;
 import com.jgxq.core.resp.ResponseMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,9 +60,9 @@ public class NewsController {
         News news = new News();
         BeanUtils.copyProperties(newsReq, news);
         UpdateWrapper<News> newsUpdate = new UpdateWrapper<>();
-        newsUpdate.eq("id",id);
-        boolean flag = newsService.update(news,newsUpdate);
-        if(flag){
+        newsUpdate.eq("id", id);
+        boolean flag = newsService.update(news, newsUpdate);
+        if (flag) {
             QueryWrapper<Tag> tagQuery = new QueryWrapper<>();
             tagQuery.eq("news_id", id);
             tagService.remove(tagQuery);
@@ -81,7 +82,7 @@ public class NewsController {
     @DeleteMapping("{id}")
     public ResponseMessage deleteNews(@PathVariable("id") Integer id) {
         UpdateWrapper<News> newsUpdate = new UpdateWrapper<>();
-        newsUpdate.eq("id",id);
+        newsUpdate.eq("id", id);
         boolean flag = newsService.remove(newsUpdate);
         QueryWrapper<Tag> tagQuery = new QueryWrapper<>();
         tagQuery.eq("news_id", id);
@@ -111,7 +112,12 @@ public class NewsController {
     @RolePermissionConf("0801")
     @GetMapping("page/{pageNum}/{pageSize}")
     public ResponseMessage pageNews(@PathVariable("pageNum") Integer pageNum,
-                                    @PathVariable("pageSize") Integer pageSize) {
+                                    @PathVariable("pageSize") Integer pageSize,
+                                    @RequestParam(value = "keyword", required = false) String keyword) {
+        if(!StringUtils.isEmpty(keyword)){
+            Page<NewsBasicRes> page = newsService.pageNewsEs(pageNum, pageSize,keyword);
+            return new ResponseMessage(page);
+        }
         Page<NewsBasicRes> list = newsService.pageNews(pageNum, pageSize);
         return new ResponseMessage(list);
     }
@@ -128,18 +134,18 @@ public class NewsController {
     @PostMapping("top/{id}")
     public ResponseMessage addTop(@PathVariable("id") Integer id) {
         Long flag = redisCache.lPush(RedisKeys.top_news.getKey(), id);
-        return new ResponseMessage(flag>0);
+        return new ResponseMessage(flag > 0);
     }
 
     @RolePermissionConf("0807")
     @DeleteMapping("top/{id}")
     public ResponseMessage deleteTop(@PathVariable("id") Integer id) {
         Long flag = redisCache.lRem(RedisKeys.top_news.getKey(), id);
-        return new ResponseMessage(flag>0);
+        return new ResponseMessage(flag > 0);
     }
 
     @GetMapping("search")
-    public ResponseMessage searchNews(@RequestParam("keyword") String keyword){
+    public ResponseMessage searchNews(@RequestParam("keyword") String keyword) {
         List<NewsSearchRes> list = newsService.searchNews(keyword);
         return new ResponseMessage(list);
     }
