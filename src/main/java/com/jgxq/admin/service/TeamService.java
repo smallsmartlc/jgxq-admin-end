@@ -15,5 +15,5 @@ import com.jgxq.common.res.TeamBasicRes;
  */
 public interface TeamService extends IService<Team> {
 
-    Page<TeamBasicRes> pageTeamEs(Integer pageNum, Integer pageSize, String keyword);
+    Page<TeamBasicRes> searchTeam(Integer pageNum, Integer pageSize, String keyword);
 }

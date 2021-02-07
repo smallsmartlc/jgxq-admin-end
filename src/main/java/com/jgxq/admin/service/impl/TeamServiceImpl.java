@@ -1,5 +1,6 @@
 package com.jgxq.admin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jgxq.admin.client.EsUtils;
 import com.jgxq.admin.entity.Team;
@@ -8,6 +9,8 @@ import com.jgxq.admin.service.TeamService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jgxq.common.res.TagSearchRes;
 import com.jgxq.common.res.TeamBasicRes;
+import com.jgxq.core.resp.PageResponse;
+import com.jgxq.core.resp.ResponseMessage;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -17,6 +20,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,7 +62,23 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     }
 
     @Override
-    public Page<TeamBasicRes> pageTeamEs(Integer pageNum, Integer pageSize, String keyword) {
+    public Page<TeamBasicRes> searchTeam(Integer pageNum, Integer pageSize, String keyword) {
+//        return pageTeamEs(pageNum,pageSize,keyword);//es搜索
+        //sql
+        Page page = new Page(pageNum, pageSize);
+        page(page,new QueryWrapper<Team>().like("`name`",keyword).orderByAsc("LENGTH(`name`)"));
+        List<Team> records = page.getRecords();
+        List<TeamBasicRes> res = new ArrayList<>(records.size());
+        records.forEach((team) -> {
+            TeamBasicRes teamBasic = new TeamBasicRes();
+            BeanUtils.copyProperties(team, teamBasic);
+            res.add(teamBasic);
+        });
+        Page<TeamBasicRes> resPage = new Page<>(page.getCurrent(),page.getSize(),page.getTotal());
+        resPage.setRecords(res);
+        return resPage;
+    }
+    private Page<TeamBasicRes> pageTeamEs(Integer pageNum, Integer pageSize, String keyword){
         SearchSourceBuilder builder = new SearchSourceBuilder();
 
         MatchPhraseQueryBuilder matchPhraseQuery = QueryBuilders.matchPhraseQuery("name.pinyin", keyword);

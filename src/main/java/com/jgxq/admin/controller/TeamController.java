@@ -73,7 +73,7 @@ public class TeamController {
                                      @PathVariable("pageSize") Integer pageSize,
                                      @RequestParam(value = "keyword",required = false) String keyword) {
         if(!StringUtils.isEmpty(keyword)){
-            Page<TeamBasicRes> page = teamService.pageTeamEs(pageNum, pageSize,keyword);
+            Page<TeamBasicRes> page = teamService.searchTeam(pageNum, pageSize,keyword);
             return new ResponseMessage(new PageResponse<>(page.getRecords(), pageNum, pageSize, page.getTotal()));
         }
         Page page = new Page(pageNum, pageSize);

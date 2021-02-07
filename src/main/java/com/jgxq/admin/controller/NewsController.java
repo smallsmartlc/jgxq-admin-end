@@ -115,7 +115,7 @@ public class NewsController {
                                     @PathVariable("pageSize") Integer pageSize,
                                     @RequestParam(value = "keyword", required = false) String keyword) {
         if(!StringUtils.isEmpty(keyword)){
-            Page<NewsBasicRes> page = newsService.pageNewsEs(pageNum, pageSize,keyword);
+            Page<NewsBasicRes> page = newsService.searchNewsPage(pageNum, pageSize,keyword);
             return new ResponseMessage(page);
         }
         Page<NewsBasicRes> list = newsService.pageNews(pageNum, pageSize);

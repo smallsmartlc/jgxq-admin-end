@@ -83,8 +83,8 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     @Override
     public List<TagSearchRes> searchTag(String keyword) {
         //使用Sql做搜索
-//        return tagMapper.searchTag(keyword);
-        return searchTagByEs(keyword);
+        return tagMapper.searchTag(keyword);
+//        return searchTagByEs(keyword);
     }
 
     private List<TagSearchRes> searchTagByEs(String keyword) {

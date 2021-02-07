@@ -65,29 +65,32 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
     }
 
     @Override
-    public Page<NewsBasicRes> pageNewsEs(Integer pageNum, Integer pageSize, String keyword) {
-        SearchSourceBuilder builder = new SearchSourceBuilder();
-
-        MatchQueryBuilder matchQuery1 = QueryBuilders.matchQuery("title", keyword);
-        MatchQueryBuilder matchQuery2 = QueryBuilders.matchQuery("text", keyword);
-        matchQuery1.boost(2);
-        matchQuery2.boost(1);
-
-        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("status", 1);
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(termQueryBuilder);
-        boolQueryBuilder.must(new BoolQueryBuilder().should(matchQuery1).should(matchQuery2));
-
-        builder.query(boolQueryBuilder);
-        Page<NewsBasicRes> resPage = esClient.search("jgxq_news", builder, NewsBasicRes.class, pageNum,pageSize);
+    public Page<NewsBasicRes> searchNewsPage(Integer pageNum, Integer pageSize, String keyword) {
+//        return searchNewsPageEs(pageNum, pageSize, keyword);//es
+        Page<News> page = new Page<>(pageNum, pageSize); //sql
+        QueryWrapper<News> wrapper = new QueryWrapper<>();
+        wrapper.like("title", keyword).orderByAsc("LENGTH(title)");
+        newsMapper.selectPage(page, wrapper);
+        List<News> newsList = page.getRecords();
+        List<String> userKeys = newsList.stream().map(News::getAuthor).collect(Collectors.toList());
+        Map<String, String> authorMap = userService.getAuthorInfo(userKeys);
+        List<NewsBasicRes> newsBasicList = newsList.stream().map(news -> {
+            NewsBasicRes newsBasicRes = new NewsBasicRes();
+            BeanUtils.copyProperties(news, newsBasicRes);
+            newsBasicRes.setAuthor(authorMap.get(news.getAuthor()));
+            return newsBasicRes;
+        }).collect(Collectors.toList());
+        Page<NewsBasicRes> resPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        resPage.setRecords(newsBasicList);
         return resPage;
     }
 
     @Override
     public List<NewsSearchRes> searchNews(String keyword) {
-//        QueryWrapper<News> wrapper = new QueryWrapper<>();
-//        wrapper.like("title", keyword).orderByAsc("LENGTH(title)");
-        List<News> list = searchNewsEs(keyword);
+        QueryWrapper<News> wrapper = new QueryWrapper<>();
+        wrapper.like("title", keyword).orderByAsc("LENGTH(title)");
+//        List<News> list = searchNewsEs(keyword); //使用es搜索
+        List<News> list = newsMapper.selectList(wrapper);
         List<NewsSearchRes> res = list.stream().map(n -> {
             NewsSearchRes temp = new NewsSearchRes();
             BeanUtils.copyProperties(n, temp);
@@ -100,7 +103,7 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
     public List<NewsSearchRes> listNewsInIds(List<Integer> ids) {
         if (ids.isEmpty()) return Collections.emptyList();
         QueryWrapper<News> wrapper = new QueryWrapper<>();
-        wrapper.select("id", "title", "cover").in("id",ids).orderByDesc("create_at");
+        wrapper.select("id", "title", "cover").in("id", ids).orderByDesc("create_at");
         List<News> newsList = newsMapper.selectList(wrapper);
         List<NewsSearchRes> res = newsList.stream().map(n -> {
             NewsSearchRes temp = new NewsSearchRes();
@@ -126,6 +129,24 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
         builder.query(boolQueryBuilder);
         List<News> resList = esClient.search("jgxq_news", builder, News.class, 10);
         return resList;
+    }
+
+    private Page<NewsBasicRes> searchNewsPageEs(Integer pageNum, Integer pageSize, String keyword) {
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+
+        MatchQueryBuilder matchQuery1 = QueryBuilders.matchQuery("title", keyword);
+        MatchQueryBuilder matchQuery2 = QueryBuilders.matchQuery("text", keyword);
+        matchQuery1.boost(2);
+        matchQuery2.boost(1);
+
+        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("status", 1);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(termQueryBuilder);
+        boolQueryBuilder.must(new BoolQueryBuilder().should(matchQuery1).should(matchQuery2));
+
+        builder.query(boolQueryBuilder);
+        Page<NewsBasicRes> resPage = esClient.search("jgxq_news", builder, NewsBasicRes.class, pageNum, pageSize);
+        return resPage;
     }
 
 }
