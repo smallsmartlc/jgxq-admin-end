@@ -2,6 +2,7 @@ package com.jgxq.admin.controller;
 
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jgxq.admin.entity.Team;
 import com.jgxq.admin.service.TeamService;
 import com.jgxq.common.dto.TeamInfos;
@@ -11,18 +12,20 @@ import com.jgxq.common.res.TeamRes;
 import com.jgxq.common.utils.ReqUtils;
 import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.anotation.UserPermissionConf;
-import com.jgxq.core.resp.Page;
+import com.jgxq.core.resp.PageResponse;
 import com.jgxq.core.resp.ResponseMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author smallsmart
@@ -67,9 +70,13 @@ public class TeamController {
     @RolePermissionConf("0501")
     @GetMapping("page/{pageNum}/{pageSize}")
     public ResponseMessage PageTeams(@PathVariable("pageNum") Integer pageNum,
-                                     @PathVariable("pageSize") Integer pageSize) {
-
-        com.baomidou.mybatisplus.extension.plugins.pagination.Page page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page(pageNum,pageSize);
+                                     @PathVariable("pageSize") Integer pageSize,
+                                     @RequestParam(value = "keyword",required = false) String keyword) {
+        if(!StringUtils.isEmpty(keyword)){
+            Page<TeamBasicRes> page = teamService.pageTeamEs(pageNum, pageSize,keyword);
+            return new ResponseMessage(new PageResponse<>(page.getRecords(), pageNum, pageSize, page.getTotal()));
+        }
+        Page page = new Page(pageNum, pageSize);
         teamService.page(page);
         List<Team> records = page.getRecords();
         List<TeamBasicRes> res = new ArrayList<>(records.size());
@@ -79,7 +86,7 @@ public class TeamController {
             res.add(teamBasic);
         });
 
-        return new ResponseMessage(new Page(res, pageNum, pageSize, page.getTotal()));
+        return new ResponseMessage(new PageResponse<>(res, pageNum, pageSize, page.getTotal()));
 
     }
 
@@ -87,7 +94,7 @@ public class TeamController {
     @GetMapping("infos/{id}")
     public ResponseMessage getTeamById(@PathVariable("id") Integer id) {
         Team team = teamService.getById(id);
-        if(team == null){
+        if (team == null) {
             return new ResponseMessage(team);
         }
         TeamRes teamRes = new TeamRes();
