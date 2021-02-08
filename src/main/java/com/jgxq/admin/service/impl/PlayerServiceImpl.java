@@ -57,11 +57,15 @@ public class PlayerServiceImpl extends ServiceImpl<PlayerMapper, Player> impleme
 
     @Override
     public List<PlayerSearchRes> searchPlayer(String keyword) {
-        List<Integer> playerIds = searchPlayerEs(keyword);
-        if (playerIds.isEmpty()){
-            return Collections.emptyList();
-        }
-        List<Player> list = playerMapper.selectBatchIds(playerIds);
+        //es 搜索
+//        List<Integer> playerIds = searchPlayerEs(keyword);
+//        if (playerIds.isEmpty()){
+//            return Collections.emptyList();
+//        }
+//        List<Player> list = playerMapper.selectBatchIds(playerIds);
+        // fixme sql搜索
+        List<Player> list = playerMapper.selectList(new QueryWrapper<Player>().
+                like("`name`",keyword).orderByAsc("LENGTH(`name`)"));
         List<PlayerSearchRes> resList = list.stream().map(p -> {
             //转为PlayerTeamList
             PlayerSearchRes player = new PlayerSearchRes();

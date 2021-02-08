@@ -67,7 +67,7 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
     @Override
     public Page<NewsBasicRes> searchNewsPage(Integer pageNum, Integer pageSize, String keyword) {
 //        return searchNewsPageEs(pageNum, pageSize, keyword);//es
-        Page<News> page = new Page<>(pageNum, pageSize); //sql
+        Page<News> page = new Page<>(pageNum, pageSize); //fixme sql
         QueryWrapper<News> wrapper = new QueryWrapper<>();
         wrapper.like("title", keyword).orderByAsc("LENGTH(title)");
         newsMapper.selectPage(page, wrapper);
@@ -89,8 +89,8 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
     public List<NewsSearchRes> searchNews(String keyword) {
         QueryWrapper<News> wrapper = new QueryWrapper<>();
         wrapper.like("title", keyword).orderByAsc("LENGTH(title)");
+        List<News> list = newsMapper.selectList(wrapper);//fixme 使用sql搜索
 //        List<News> list = searchNewsEs(keyword); //使用es搜索
-        List<News> list = newsMapper.selectList(wrapper);
         List<NewsSearchRes> res = list.stream().map(n -> {
             NewsSearchRes temp = new NewsSearchRes();
             BeanUtils.copyProperties(n, temp);

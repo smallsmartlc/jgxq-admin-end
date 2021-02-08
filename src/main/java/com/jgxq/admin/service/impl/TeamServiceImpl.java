@@ -9,8 +9,6 @@ import com.jgxq.admin.service.TeamService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jgxq.common.res.TagSearchRes;
 import com.jgxq.common.res.TeamBasicRes;
-import com.jgxq.core.resp.PageResponse;
-import com.jgxq.core.resp.ResponseMessage;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -64,8 +62,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     @Override
     public Page<TeamBasicRes> searchTeam(Integer pageNum, Integer pageSize, String keyword) {
 //        return pageTeamEs(pageNum,pageSize,keyword);//es搜索
-        //sql
-        Page page = new Page(pageNum, pageSize);
+        Page page = new Page(pageNum, pageSize);//fixme sql
         page(page,new QueryWrapper<Team>().like("`name`",keyword).orderByAsc("LENGTH(`name`)"));
         List<Team> records = page.getRecords();
         List<TeamBasicRes> res = new ArrayList<>(records.size());
