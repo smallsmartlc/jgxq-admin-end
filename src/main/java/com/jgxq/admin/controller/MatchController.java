@@ -12,6 +12,7 @@ import com.jgxq.common.utils.DateUtils;
 import com.jgxq.common.utils.ReqUtils;
 import com.jgxq.common.utils.ResUtils;
 import com.jgxq.core.anotation.RolePermissionConf;
+import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.resp.ResponseMessage;
 import com.jgxq.admin.entity.Match;
 import com.jgxq.admin.entity.News;
@@ -39,6 +40,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/match")
+@UserPermissionConf
 public class MatchController {
 
     @Autowired

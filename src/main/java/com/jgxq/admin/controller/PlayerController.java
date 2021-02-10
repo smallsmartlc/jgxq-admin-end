@@ -4,21 +4,23 @@ package com.jgxq.admin.controller;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.injector.methods.SelectCount;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jgxq.admin.client.RedisCache;
 import com.jgxq.admin.entity.Player;
 import com.jgxq.admin.service.PlayerService;
 import com.jgxq.admin.service.impl.TeamServiceImpl;
 import com.jgxq.common.define.Position;
-import com.jgxq.common.define.StrongFoot;
 import com.jgxq.common.dto.PlayerInfos;
 import com.jgxq.common.dto.PlayerTeam;
 import com.jgxq.common.req.PlayerReq;
 import com.jgxq.common.req.TransferReq;
 import com.jgxq.common.res.*;
 import com.jgxq.common.utils.DateUtils;
+import com.jgxq.core.anotation.AllowAccess;
 import com.jgxq.core.anotation.RolePermissionConf;
+import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.enums.CommonErrorCode;
+import com.jgxq.core.enums.RedisKeys;
 import com.jgxq.core.exception.SmartException;
 import com.jgxq.core.resp.ResponseMessage;
 import org.springframework.beans.BeanUtils;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/player")
+@UserPermissionConf
 public class PlayerController {
 
     @Autowired
@@ -50,6 +53,9 @@ public class PlayerController {
 
     @Autowired
     private TeamServiceImpl teamService;
+
+    @Autowired
+    private RedisCache redisCache;
 
     @RolePermissionConf("0602")
     @PostMapping
@@ -88,8 +94,9 @@ public class PlayerController {
         return new ResponseMessage(flag);
     }
 
-    @RolePermissionConf("0600")
+//    @RolePermissionConf("0600")
     @GetMapping("{id}")
+    @AllowAccess
     public ResponseMessage getPlayerById(@PathVariable("id") Integer id) {
         Player player = playerService.getById(id);
         if (player == null) {
@@ -101,6 +108,35 @@ public class PlayerController {
         PlayerInfos infos = JSON.parseObject(player.getInfos(),PlayerInfos.class);
         playerRes.setInfos(infos);
         return new ResponseMessage(playerRes);
+    }
+
+
+    @PutMapping("user/{id}")
+    @AllowAccess
+    public ResponseMessage playerUpdate(@PathVariable("id") Integer id,
+                                        @RequestBody @Validated PlayerReq playerReq) {
+        String infos = JSON.toJSONString(playerReq.getInfos());
+
+        Player player = new Player();
+        BeanUtils.copyProperties(playerReq, player);
+        player.setInfos(infos);
+        player.setId(null);
+
+        List<Integer> ids = new ArrayList<>();
+        try {
+            ids = redisCache.lrangeInt(RedisKeys.edit_team.getKey());
+        } catch (Exception e) {
+            System.err.println("redis服务器异常");
+        }
+        if(ids.isEmpty()){
+            return new ResponseMessage(false);
+        }
+        QueryWrapper<Player> playerQuery = new QueryWrapper<>();
+        playerQuery.eq("id",id).in("team",ids);
+
+        boolean flag = playerService.update(player,playerQuery);
+
+        return new ResponseMessage(flag);
     }
 
     @RolePermissionConf("0505")
