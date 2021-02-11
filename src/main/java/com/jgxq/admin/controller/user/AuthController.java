@@ -106,7 +106,11 @@ public class AuthController {
         }
         String host = request.getServerName();
         if (!CookieUtils.LOCALHOST.equals(host)) {
-            cookie.setDomain(host.substring(host.indexOf(".") + 1));
+            if(host.startsWith("admin")){
+                cookie.setDomain(host.substring(host.indexOf(".")+1));
+            }else{
+                cookie.setDomain(host);
+            }
 //            cookie.setDomain(host);
         }
         cookie.setPath("/");

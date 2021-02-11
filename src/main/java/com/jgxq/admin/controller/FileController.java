@@ -2,6 +2,7 @@ package com.jgxq.admin.controller;
 
 import com.jgxq.admin.service.impl.FileServiceImpl;
 import com.jgxq.common.define.UpdateImgEnum;
+import com.jgxq.core.anotation.AllowAccess;
 import com.jgxq.core.anotation.UserPermissionConf;
 import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.exception.SmartException;
@@ -32,6 +33,7 @@ public class FileController {
     private FileServiceImpl fileService;
 
     @PostMapping("img/upload/{folder}")
+    @AllowAccess
     public ResponseMessage uploadImg(@RequestParam("file") MultipartFile file,
                                      @PathVariable("folder") String folder) {
         try {
