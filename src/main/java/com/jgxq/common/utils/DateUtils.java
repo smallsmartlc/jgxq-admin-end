@@ -221,7 +221,8 @@ public class DateUtils {
     }
 
     //通过出生日期获得年龄
-    public static int getAgeByBirth(Date birthday) {
+    public static Integer getAgeByBirth(Date birthday) {
+        if(birthday == null) return null;
         Calendar cal = Calendar.getInstance();
         if (cal.before(birthday)) { //出生日期晚于当前时间，无法计算
             throw new IllegalArgumentException(

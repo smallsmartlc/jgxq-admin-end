@@ -160,7 +160,6 @@ public class PlayerController {
                 //遍历map
                 res.add(new PlayerTeamRes(key, value));
             });
-
         return new ResponseMessage(res);
     }
 
