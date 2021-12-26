@@ -19,10 +19,9 @@ import com.jgxq.common.utils.DateUtils;
 import com.jgxq.core.anotation.AllowAccess;
 import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.anotation.UserPermissionConf;
-import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.enums.RedisKeys;
-import com.jgxq.core.exception.SmartException;
 import com.jgxq.core.resp.ResponseMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -94,7 +93,7 @@ public class PlayerController {
         return new ResponseMessage(flag);
     }
 
-//    @RolePermissionConf("0600")
+    //    @RolePermissionConf("0600")
     @GetMapping("{id}")
     @AllowAccess
     public ResponseMessage getPlayerById(@PathVariable("id") Integer id) {
@@ -105,7 +104,7 @@ public class PlayerController {
         PlayerRes playerRes = new PlayerRes();
         BeanUtils.copyProperties(player, playerRes);
         playerRes.setTeam(teamService.getBasicTeamById(player.getTeam()));
-        PlayerInfos infos = JSON.parseObject(player.getInfos(),PlayerInfos.class);
+        PlayerInfos infos = JSON.parseObject(player.getInfos(), PlayerInfos.class);
         playerRes.setInfos(infos);
         return new ResponseMessage(playerRes);
     }
@@ -128,13 +127,13 @@ public class PlayerController {
         } catch (Exception e) {
             System.err.println("redis服务器异常");
         }
-        if(ids.isEmpty()){
+        if (ids.isEmpty()) {
             return new ResponseMessage(false);
         }
         QueryWrapper<Player> playerQuery = new QueryWrapper<>();
-        playerQuery.eq("id",id).in("team",ids);
+        playerQuery.eq("id", id).in("team", ids);
 
-        boolean flag = playerService.update(player,playerQuery);
+        boolean flag = playerService.update(player, playerQuery);
 
         return new ResponseMessage(flag);
     }
@@ -143,8 +142,8 @@ public class PlayerController {
     @GetMapping("team/{teamId}")
     public ResponseMessage getTeamMembers(@PathVariable("teamId") Integer teamId) {
         QueryWrapper<Player> playQuery = new QueryWrapper<>();
-        playQuery.select("id","name","head_image","nation","number","position","birthday")
-                .eq("team",teamId).orderByAsc("name");
+        playQuery.select("id", "name", "head_image", "nation", "number", "position", "birthday")
+                .eq("team", teamId).orderByAsc("name");
         List<Player> list = playerService.list(playQuery);
         List<PlayerTeamRes> res = new ArrayList<>();
         list.stream().map(player -> {
@@ -156,10 +155,10 @@ public class PlayerController {
             return playerTeam;
         }).collect(Collectors.groupingBy((playerTeam -> Position.getPositionByVal(playerTeam.getPosition()))))
                 //转为map
-            .forEach((key, value) -> {
-                //遍历map
-                res.add(new PlayerTeamRes(key, value));
-            });
+                .forEach((key, value) -> {
+                    //遍历map
+                    res.add(new PlayerTeamRes(key, value));
+                });
         return new ResponseMessage(res);
     }
 
@@ -167,8 +166,8 @@ public class PlayerController {
     @GetMapping("match/{teamId}")
     public ResponseMessage getMatchTeamMembers(@PathVariable("teamId") Integer teamId) {
         QueryWrapper<Player> playQuery = new QueryWrapper<>();
-        playQuery.select("id","name","number","position")
-                .eq("team",teamId).orderByAsc("name");
+        playQuery.select("id", "name", "number", "position")
+                .eq("team", teamId).orderByAsc("name");
         List<Player> list = playerService.list(playQuery);
         List<PlayerMatchRes> resList = list.stream().map(p -> {
             //转为PlayerTeamList
@@ -188,10 +187,15 @@ public class PlayerController {
 
     @RolePermissionConf("0601")
     @GetMapping("page/{cur}/{size}")
-    public ResponseMessage pagePlayer(@PathVariable("cur")Integer cur,
-                                      @PathVariable("size") Integer size){
+    public ResponseMessage pagePlayer(@PathVariable("cur") Integer cur,
+                                      @PathVariable("size") Integer size,
+                                      @RequestParam(value = "keyword", required = false) String keyword) {
         Page<Player> page = new Page<>(cur, size);
-        playerService.page(page);
+        QueryWrapper<Player> wrapper = new QueryWrapper<>();
+        if (StringUtils.isNotEmpty(keyword)) {
+            wrapper.likeRight("name", keyword);
+        }
+        playerService.page(page, wrapper);
         List<Player> playerList = page.getRecords();
         List<Integer> teamIds = playerList.stream().map(Player::getTeam).collect(Collectors.toList());
         Map<Integer, TeamBasicRes> map = teamService.getBasicTeamsByIds(teamIds)
@@ -201,7 +205,7 @@ public class PlayerController {
             BeanUtils.copyProperties(p, playerBasic);
             playerBasic.setTeam(map.get(p.getTeam()));
             playerBasic.setPosition(Position.getPositionByVal(p.getPosition()));
-            if(p.getBirthday() != null){
+            if (p.getBirthday() != null) {
                 playerBasic.setAge(DateUtils.getAgeByBirth(p.getBirthday()));
             }
             return playerBasic;
@@ -213,19 +217,19 @@ public class PlayerController {
 
     @RolePermissionConf("0602")
     @PutMapping("transfer")
-    public ResponseMessage transfer(@RequestBody TransferReq transferReq){
+    public ResponseMessage transfer(@RequestBody TransferReq transferReq) {
         UpdateWrapper<Player> playerUpdate = new UpdateWrapper<>();
-        playerUpdate.eq("id",transferReq.getPlayerId());
-        if(transferReq.getSourceTeam()!=null){
-            playerUpdate.eq("team",transferReq.getSourceTeam());
+        playerUpdate.eq("id", transferReq.getPlayerId());
+        if (transferReq.getSourceTeam() != null) {
+            playerUpdate.eq("team", transferReq.getSourceTeam());
         }
-        playerUpdate.set("team",transferReq.getTargetTeam());
+        playerUpdate.set("team", transferReq.getTargetTeam());
         boolean flag = playerService.update(playerUpdate);
         return new ResponseMessage(flag);
     }
 
     @GetMapping("search")
-    public ResponseMessage searchPlayer(@RequestParam("keyword") @NotBlank String keyword){
+    public ResponseMessage searchPlayer(@RequestParam("keyword") @NotBlank String keyword) {
         List<PlayerSearchRes> list = playerService.searchPlayer(keyword);
         return new ResponseMessage(list);
     }
