@@ -12,6 +12,7 @@ import com.jgxq.admin.service.impl.TeamServiceImpl;
 import com.jgxq.common.define.Position;
 import com.jgxq.common.dto.PlayerInfos;
 import com.jgxq.common.dto.PlayerTeam;
+import com.jgxq.common.req.PlayBatchRetireReq;
 import com.jgxq.common.req.PlayerReq;
 import com.jgxq.common.req.TransferReq;
 import com.jgxq.common.res.*;
@@ -145,20 +146,14 @@ public class PlayerController {
         playQuery.select("id", "name", "head_image", "nation", "number", "position", "birthday")
                 .eq("team", teamId).orderByAsc("name");
         List<Player> list = playerService.list(playQuery);
-        List<PlayerTeamRes> res = new ArrayList<>();
-        list.stream().map(player -> {
+        List<PlayerTeam> res = list.stream().map(player -> {
             //转为PlayerTeamList
             PlayerTeam playerTeam = new PlayerTeam();
             BeanUtils.copyProperties(player, playerTeam);
             playerTeam.setPosition(player.getPosition().intValue());
             playerTeam.setAge(DateUtils.getAgeByBirth(player.getBirthday()));
             return playerTeam;
-        }).collect(Collectors.groupingBy((playerTeam -> Position.getPositionByVal(playerTeam.getPosition()))))
-                //转为map
-                .forEach((key, value) -> {
-                    //遍历map
-                    res.add(new PlayerTeamRes(key, value));
-                });
+        }).collect(Collectors.toList());
         return new ResponseMessage(res);
     }
 
@@ -232,6 +227,17 @@ public class PlayerController {
     public ResponseMessage searchPlayer(@RequestParam("keyword") @NotBlank String keyword) {
         List<PlayerSearchRes> list = playerService.searchPlayer(keyword);
         return new ResponseMessage(list);
+    }
+
+    @RolePermissionConf("0602")
+    @PutMapping("batchRetire")
+    public ResponseMessage batchRetire(@RequestBody @Validated PlayBatchRetireReq retireReq) {
+        UpdateWrapper updateWrapper = new UpdateWrapper();
+        updateWrapper.eq("team",retireReq.getTeamId());
+        updateWrapper.in("id",retireReq.getPlayerIdList());
+        updateWrapper.set("team",0);
+        playerService.update(updateWrapper);
+        return new ResponseMessage(1);
     }
 
 }
