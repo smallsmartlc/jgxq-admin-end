@@ -236,8 +236,8 @@ public class PlayerController {
         updateWrapper.eq("team",retireReq.getTeamId());
         updateWrapper.in("id",retireReq.getPlayerIdList());
         updateWrapper.set("team",0);
-        playerService.update(updateWrapper);
-        return new ResponseMessage(1);
+        boolean flag = playerService.update(updateWrapper);
+        return new ResponseMessage(flag);
     }
 
 }
