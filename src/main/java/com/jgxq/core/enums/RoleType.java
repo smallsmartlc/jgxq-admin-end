@@ -1,7 +1,5 @@
 package com.jgxq.core.enums;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public enum RoleType {
     T0000("0000","超级管理员"),
@@ -32,6 +30,8 @@ public enum RoleType {
     T0603("0603","删除球员"),
     T0604("0604","编辑球员信息"),
     T0605("0605","球员转会"),
+    T0606("0606","球员退役"),
+    T0607("0607","批量插入球员"),
     T0700("0700","查看比赛"),
     T0701("0701","查看比赛列表"),
     T0702("0702","添加比赛"),

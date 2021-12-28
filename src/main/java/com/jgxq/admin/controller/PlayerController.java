@@ -2,6 +2,7 @@ package com.jgxq.admin.controller;
 
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.exception.ExcelCommonException;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -233,7 +234,7 @@ public class PlayerController {
         return new ResponseMessage(list);
     }
 
-    @RolePermissionConf("0603")
+    @RolePermissionConf("0606")
     @PutMapping("batchRetire")
     public ResponseMessage batchRetire(@RequestBody @Validated PlayBatchRetireReq retireReq) {
         UpdateWrapper updateWrapper = new UpdateWrapper();
@@ -244,7 +245,7 @@ public class PlayerController {
         return new ResponseMessage(flag);
     }
 
-    @RolePermissionConf("0604")
+    @RolePermissionConf("0607")
     @PostMapping("upload/{teamId}")
     public ResponseMessage importPlayer(MultipartFile file,@PathVariable Integer teamId){
         List<PlayerExcelDto> list = new ArrayList<>();
@@ -254,6 +255,8 @@ public class PlayerController {
             })).sheet().doRead();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ExcelCommonException e){
+            throw new SmartException(CommonErrorCode.BAD_REQUEST.getErrorCode(),"只允许上传Excel文件");
         }
         if(list.isEmpty()){
             throw new SmartException(CommonErrorCode.BAD_PARAMETERS.getErrorCode(),"球员表不能为空");
@@ -263,6 +266,7 @@ public class PlayerController {
 
         QueryWrapper query = new QueryWrapper();
         query.in("name",nameList);
+        query.eq("team",teamId);
 
         List<Player> existPlayerList = playerService.list(query);
 
@@ -287,5 +291,6 @@ public class PlayerController {
         }
         return new ResponseMessage(notExistPlayerList.size());
     }
+
 
 }
