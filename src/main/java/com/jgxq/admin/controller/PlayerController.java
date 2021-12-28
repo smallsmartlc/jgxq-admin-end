@@ -1,6 +1,8 @@
 package com.jgxq.admin.controller;
 
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -10,6 +12,7 @@ import com.jgxq.admin.entity.Player;
 import com.jgxq.admin.service.PlayerService;
 import com.jgxq.admin.service.impl.TeamServiceImpl;
 import com.jgxq.common.define.Position;
+import com.jgxq.common.dto.PlayerExcelDto;
 import com.jgxq.common.dto.PlayerInfos;
 import com.jgxq.common.dto.PlayerTeam;
 import com.jgxq.common.req.PlayBatchRetireReq;
@@ -20,19 +23,20 @@ import com.jgxq.common.utils.DateUtils;
 import com.jgxq.core.anotation.AllowAccess;
 import com.jgxq.core.anotation.RolePermissionConf;
 import com.jgxq.core.anotation.UserPermissionConf;
+import com.jgxq.core.enums.CommonErrorCode;
 import com.jgxq.core.enums.RedisKeys;
+import com.jgxq.core.exception.SmartException;
 import com.jgxq.core.resp.ResponseMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -229,7 +233,7 @@ public class PlayerController {
         return new ResponseMessage(list);
     }
 
-    @RolePermissionConf("0602")
+    @RolePermissionConf("0603")
     @PutMapping("batchRetire")
     public ResponseMessage batchRetire(@RequestBody @Validated PlayBatchRetireReq retireReq) {
         UpdateWrapper updateWrapper = new UpdateWrapper();
@@ -238,6 +242,50 @@ public class PlayerController {
         updateWrapper.set("team",0);
         boolean flag = playerService.update(updateWrapper);
         return new ResponseMessage(flag);
+    }
+
+    @RolePermissionConf("0604")
+    @PostMapping("upload/{teamId}")
+    public ResponseMessage importPlayer(MultipartFile file,@PathVariable Integer teamId){
+        List<PlayerExcelDto> list = new ArrayList<>();
+        try {
+            EasyExcel.read(file.getInputStream(), PlayerExcelDto.class,new PageReadListener<PlayerExcelDto>(dataList -> {
+                 list.addAll(dataList);
+            })).sheet().doRead();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(list.isEmpty()){
+            throw new SmartException(CommonErrorCode.BAD_PARAMETERS.getErrorCode(),"球员表不能为空");
+        }
+        List<String> nameList = list.stream()
+                .map(PlayerExcelDto::getName).collect(Collectors.toList());
+
+        QueryWrapper query = new QueryWrapper();
+        query.in("name",nameList);
+
+        List<Player> existPlayerList = playerService.list(query);
+
+        List<Player> notExistPlayerList = null;
+        if(!existPlayerList.isEmpty()){
+            Set<String> existPlayerSet = existPlayerList.stream().map(Player::getName).collect(Collectors.toSet());
+            notExistPlayerList = list.stream().filter(p->!existPlayerSet.contains(p.getName()))
+                    .map(p-> {
+                        Player entity = p.getEntity();
+                        entity.setTeam(teamId);
+                        return entity;
+                    }).collect(Collectors.toList());
+        }else{
+            notExistPlayerList = list.stream().map(p-> {
+                Player entity = p.getEntity();
+                entity.setTeam(teamId);
+                return entity;
+            }).collect(Collectors.toList());
+        }
+        if(!notExistPlayerList.isEmpty()){
+            playerService.saveBatch(notExistPlayerList);
+        }
+        return new ResponseMessage(notExistPlayerList.size());
     }
 
 }
