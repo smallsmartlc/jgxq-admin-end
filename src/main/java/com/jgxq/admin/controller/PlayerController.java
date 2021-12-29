@@ -17,6 +17,7 @@ import com.jgxq.common.dto.PlayerExcelDto;
 import com.jgxq.common.dto.PlayerInfos;
 import com.jgxq.common.dto.PlayerTeam;
 import com.jgxq.common.req.PlayBatchRetireReq;
+import com.jgxq.common.req.PlayerBatchAddReq;
 import com.jgxq.common.req.PlayerReq;
 import com.jgxq.common.req.TransferReq;
 import com.jgxq.common.res.*;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -237,7 +239,7 @@ public class PlayerController {
     @RolePermissionConf("0606")
     @PutMapping("batchRetire")
     public ResponseMessage batchRetire(@RequestBody @Validated PlayBatchRetireReq retireReq) {
-        UpdateWrapper updateWrapper = new UpdateWrapper();
+        UpdateWrapper<Player> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("team",retireReq.getTeamId());
         updateWrapper.in("id",retireReq.getPlayerIdList());
         updateWrapper.set("team",0);
@@ -292,5 +294,36 @@ public class PlayerController {
         return new ResponseMessage(notExistPlayerList.size());
     }
 
+    @RolePermissionConf("0607")
+    @PostMapping("batch/add/{teamId}")
+    public ResponseMessage batchAddPlayer(@RequestBody @Validated PlayerBatchAddReq batchReq){
+        List<Player> players = batchReq.getPlayers();
+        if (players.isEmpty()){
+            throw new SmartException(CommonErrorCode.BAD_REQUEST.getErrorCode(),"列表不能为空");
+        }
+        List<String> playerIds = players.stream().map(Player::getName).collect(Collectors.toList());
+        QueryWrapper<Player> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("team",batchReq.getTeamId())
+                .in("name",playerIds);
+        Set<String> nameSet = playerService.list(queryWrapper)
+                .stream().map(Player::getName).collect(Collectors.toSet());
+        List<Player> saveList = new ArrayList<>(nameSet.size());
+
+        for (Player p : players) {
+            if(nameSet.contains(p.getName())){
+                continue;
+            }
+            p.setEnName("");
+            p.setInfos("{\"normal\": [{\"name\": \"身价\", \"value\": \"60万欧元\"}]}");
+            p.setTeam(batchReq.getTeamId());
+            p.setPosition((byte) Position.AM.getValue());
+            p.setWeight(0);
+            p.setHeight(0);
+            p.setStrongFoot((byte)0);
+            saveList.add(p);
+        }
+        playerService.saveBatch(saveList);
+        return new ResponseMessage(saveList.size());
+    }
 
 }

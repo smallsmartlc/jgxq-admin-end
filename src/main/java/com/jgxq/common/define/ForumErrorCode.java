@@ -30,7 +30,12 @@ public enum ForumErrorCode {
     /**
      * 用户已存在
      */
-    User_Exists("0068000006");
+    User_Exists("0068000006"),
+
+    /**
+     * 服务器请求失败
+     */
+    Service_Request_Fail("0068000007");
 
     private String errorCode;
 
