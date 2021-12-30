@@ -295,7 +295,7 @@ public class PlayerController {
     }
 
     @RolePermissionConf("0607")
-    @PostMapping("batch/add/{teamId}")
+    @PostMapping("batch/add")
     public ResponseMessage batchAddPlayer(@RequestBody @Validated PlayerBatchAddReq batchReq){
         List<Player> players = batchReq.getPlayers();
         if (players.isEmpty()){
