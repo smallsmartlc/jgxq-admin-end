@@ -40,7 +40,7 @@ public class SpiderController {
                 if(name.equals("替补")) continue;
                 String number = element.getElementsByClass("lineup-number").get(0)
                         .getElementsByTag("div").eq(0).text();
-                homeList.add(new PlayerSpiderDto(name,Integer.parseInt(number)));
+                homeList.add(new PlayerSpiderDto(name,number));
             }
             Element rightElement = lineup.getElementsByClass("float-right").last();
             Elements rightElements = rightElement.getElementsByClass("lineup-player");
@@ -49,9 +49,10 @@ public class SpiderController {
                 if(name.equals("替补")) continue;
                 String number = element.getElementsByClass("lineup-number").get(0)
                         .getElementsByTag("div").eq(0).text();
-                subList.add(new PlayerSpiderDto(name,Integer.parseInt(number)));
+                subList.add(new PlayerSpiderDto(name,number));
             }
         } catch (IOException e) {
+            System.err.println(e);
             throw new SmartException(ForumErrorCode.Service_Request_Fail.getErrorCode(),"无法获取该比赛数据");
         }
         return new ResponseMessage(new PlaySpiderRes(homeList,subList));
